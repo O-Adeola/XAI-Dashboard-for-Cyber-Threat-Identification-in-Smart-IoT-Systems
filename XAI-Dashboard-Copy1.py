@@ -1287,11 +1287,6 @@ elif page == "Prediction":
             proba_df.columns = ["Probability"]
             proba_df = proba_df.sort_values(by="Probability", ascending=False)
 
-            st.plotly_chart(
-                fig,
-                use_container_width=False
-            )
-
             st.subheader("Class probabilities")
             st.dataframe(
                 styled_table(proba_df),
