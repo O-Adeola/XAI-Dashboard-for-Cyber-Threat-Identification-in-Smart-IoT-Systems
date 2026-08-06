@@ -1372,7 +1372,8 @@ elif page == "Explainability":
                 predicted attack for that specific instance.
                 """)
 
-        if selected_model_name == "Logistic Regression":
+        if selected_model_name == "Logistic Regression": 
+            st.subheader(f"{selected_model_name} - SHAP Local Explanations")
             pred_label = plot_lr_reasoning(selected_model, x_row, feature_names, target_encoder)
             st.success(f"Predicted class: {pred_label}")
             st.info(
@@ -1387,6 +1388,8 @@ elif page == "Explainability":
             explainer, shap_bg, shap_row = get_tree_shap(selected_model, background, x_row)
             pred = selected_model.predict(x_row)[0]
             pred_label = target_encoder.inverse_transform([pred])[0]
+
+            st.subheader(f"{selected_model_name} - SHAP Local Explanation")
         
             st.success(f"Predicted class: {pred_label}")
             plot_tree_shap_local(
@@ -1437,7 +1440,9 @@ elif page == "Explainability":
             
             plt.figure(figsize=(13,6))
 
-            plt.title(f"{selected_model_name} - SHAP Global Feature Importance")
+            # plt.title(f"{selected_model_name} - SHAP Global Feature Importance")
+
+            st.subheader(f"{selected_model_name} - SHAP Global Feature Importance")
             
             shap.summary_plot(
                 shap_values,
@@ -1459,7 +1464,9 @@ elif page == "Explainability":
         
                 plt.figure(figsize=(13, 6))
 
-                plt.title(f"{selected_model_name} - SHAP Global Feature Importance")
+                # plt.title(f"{selected_model_name} - SHAP Global Feature Importance")
+
+                st.subheader(f"{selected_model_name} - SHAP Global Feature Importance")
         
                 shap.summary_plot(shap_values_bg, background, show=False)
         
