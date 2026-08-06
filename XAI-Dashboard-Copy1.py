@@ -1431,6 +1431,8 @@ elif page == "Explainability":
                 plt.figure(figsize=(13, 6))
         
                 shap.summary_plot(shap_values_bg, background, show=False)
+
+                plt.title(f"{selected_model_name} - SHAP Global Feature Importance")
         
                 st.pyplot(plt.gcf())
         
