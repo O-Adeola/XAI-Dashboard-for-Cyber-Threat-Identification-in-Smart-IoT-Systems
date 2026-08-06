@@ -1387,7 +1387,7 @@ elif page == "Explainability":
             explainer, shap_bg, shap_row = get_tree_shap(selected_model, background, x_row)
             pred = selected_model.predict(x_row)[0]
             pred_label = target_encoder.inverse_transform([pred])[0]
-
+        
             st.success(f"Predicted class: {pred_label}")
             plot_tree_shap_local(
                 selected_model,
@@ -1422,18 +1422,20 @@ elif page == "Explainability":
 
         if selected_model_name != "Logistic Regression":
             try:
-                background = eval_sample.sample(
-                    n=min(1000, len(eval_sample)),
-                    random_state=42
-                )
+                background = eval_sample.sample(n=min(1000, len(eval_sample)), random_state=42)
+        
                 explainer = shap.TreeExplainer(selected_model)
+        
                 shap_values_bg = explainer.shap_values(background)
-
-                fig = plt.figure(figsize=(13, 6))
+        
+                plt.figure(figsize=(13, 6))
+        
                 shap.summary_plot(shap_values_bg, background, show=False)
-                plt.tight_layout(pad=2)
-                st.pyplot(fig)
-                plt.close(fig)
+        
+                st.pyplot(plt.gcf())
+        
+                plt.close()
+        
             except Exception as e:
                 st.warning(f"SHAP summary plot could not be rendered here: {e}")
 
