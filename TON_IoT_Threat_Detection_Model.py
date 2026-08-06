@@ -29,6 +29,21 @@ import shap
 import joblib
 
 
+PROJECT_DIR = Path.cwd()
+
+DATASET_DIR = (
+    PROJECT_DIR /
+    "datasets" /
+    "TON_IoT"
+)
+
+MODEL_DIR = DATASET_DIR / "models"
+ARTIFACTS_DIR = DATASET_DIR / "artifacts"
+
+MODEL_DIR.mkdir(parents=True, exist_ok=True)
+ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+
+
 pd.set_option('display.max_columns', None)
 
 
@@ -1942,26 +1957,6 @@ shap.plots.force(lr_shap_values[row_idx, :, pred_class])
 
 
 # In[74]:
-
-
-from pathlib import Path
-import joblib
-from sklearn.metrics import classification_report
-import pandas as pd
-
-PROJECT_DIR = Path.cwd()
-
-DATASET_DIR = (
-    PROJECT_DIR /
-    "datasets" /
-    "TON_IoT"
-)
-
-MODEL_DIR = DATASET_DIR / "models"
-ARTIFACTS_DIR = DATASET_DIR / "artifacts"
-
-MODEL_DIR.mkdir(parents=True, exist_ok=True)
-ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 
