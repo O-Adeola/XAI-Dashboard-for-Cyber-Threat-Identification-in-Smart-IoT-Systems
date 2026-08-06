@@ -1420,6 +1420,35 @@ elif page == "Explainability":
             use_container_width=True
         )
 
+        if selected_model_name == "Logistic Regression": 
+            background = eval_sample.sample(
+                n=min(1000, len(eval_sample)),
+                random_state=42
+            )
+            
+            lr = selected_model.named_steps["lr"]
+            
+            explainer = shap.LinearExplainer(
+                lr,
+                background
+            )
+            
+            shap_values = explainer.shap_values(background)
+            
+            plt.figure(figsize=(13,6))
+
+            plt.title(f"{selected_model_name} - SHAP Global Feature Importance")
+            
+            shap.summary_plot(
+                shap_values,
+                background,
+                show=False
+            )
+            
+            st.pyplot(plt.gcf())
+            
+            plt.close()
+
         if selected_model_name != "Logistic Regression":
             try:
                 background = eval_sample.sample(n=min(1000, len(eval_sample)), random_state=42)
@@ -1429,10 +1458,10 @@ elif page == "Explainability":
                 shap_values_bg = explainer.shap_values(background)
         
                 plt.figure(figsize=(13, 6))
-        
-                shap.summary_plot(shap_values_bg, background, show=False)
 
                 plt.title(f"{selected_model_name} - SHAP Global Feature Importance")
+        
+                shap.summary_plot(shap_values_bg, background, show=False)
         
                 st.pyplot(plt.gcf())
         
