@@ -1375,6 +1375,7 @@ elif page == "Explainability":
         if selected_model_name == "Logistic Regression":
             pred_label = plot_lr_reasoning(selected_model, x_row, feature_names, target_encoder)
             st.success(f"Predicted class: {pred_label}")
+            st.subheader(f"{selected_model_name} - SHAP Local Explanation Waterfall Plot")
             st.info(
                 "For Logistic Regression, the dashboard shows coefficient-based importance instead of Tree SHAP."
             )
@@ -1388,7 +1389,7 @@ elif page == "Explainability":
             pred = selected_model.predict(x_row)[0]
             pred_label = target_encoder.inverse_transform([pred])[0]
 
-            plt.title(f"{selected_model_name} - SHAP Local Explanation Waterfall Plot")
+            st.subheader(f"{selected_model_name} - SHAP Local Explanation Waterfall Plot")
         
             st.success(f"Predicted class: {pred_label}")
             plot_tree_shap_local(
