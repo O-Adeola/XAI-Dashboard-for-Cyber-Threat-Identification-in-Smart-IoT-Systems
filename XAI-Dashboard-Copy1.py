@@ -38,8 +38,10 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-header[data-testid="stHeader"] {
-    --st-text-color: #FFFFFF !important;
+.css-1jc7ptx, .e1ewe7hr3, .viewerBadge_container__1QSob,
+.styles_viewerBadge__1yB5_, .viewerBadge_link__1S137,
+.viewerBadge_text__1JaDK {
+    display: none;
 }
 
 /* Background */
@@ -87,7 +89,6 @@ section[data-testid="stSidebar"] div[data-baseweb="select"] span{
 
 div[data-testid="stToolbar"]{
     background:#1A40A3;
-    color: white !important;
 }
 
 header[data-testid="stHeader"]{
