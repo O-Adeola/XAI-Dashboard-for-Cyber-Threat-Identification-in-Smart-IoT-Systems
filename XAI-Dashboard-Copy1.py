@@ -85,7 +85,7 @@ div[data-testid="stToolbar"]{
     background:#1A40A3;
 }
 
-header[data-testid="stHeader"] * {
+header[data-testid="stHeader"]{
     color: white !important;
 }
 
@@ -267,7 +267,6 @@ span[data-testid="stIconMaterial"] {
 [data-testid="stToolbar"] svg,
 [data-testid="stToolbar"] svg path {
     color: white !important;
-    fill: white !important;
     stroke: white !important;
 }
 
