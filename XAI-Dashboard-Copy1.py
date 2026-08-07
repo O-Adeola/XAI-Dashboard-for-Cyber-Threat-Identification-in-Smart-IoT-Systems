@@ -248,14 +248,8 @@ font-size:12px;
 
 }
 
-[data-testid="stSidebarCollapsedControl"] div,
-[data-testid="stSidebarCollapseButton"] div {
-
-    background: transparent !important;
+span[data-testid="stIconMaterial"] {
     color: white !important;
-    border: none !important;
-    box-shadow: none !important;
-
 }
 
 
