@@ -38,12 +38,6 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-.css-1jc7ptx, .e1ewe7hr3, .viewerBadge_container__1QSob,
-.styles_viewerBadge__1yB5_, .viewerBadge_link__1S137,
-.viewerBadge_text__1JaDK {
-    display: none;
-}
-
 /* Background */
 .stApp{
     background:#F4F7FB;
@@ -272,26 +266,23 @@ span[data-testid="stIconMaterial"] {
    STREAMLIT HEADER TOOLBAR ICONS 
    ========================================================= */
 
-    /* General Streamlit icons */
-    svg {
-        fill: white !important;
-        color: white !important;
-    }
+/* Streamlit top-right toolbar */
+[data-testid="stToolbar"] {
+    color: white !important;
+}
 
-    /* Dropdown arrows */
-    div[data-baseweb="select"] svg {
-        fill: white !important;
-    }
+[data-testid="stToolbar"] button {
+    color: white !important;
+}
 
-    /* Sidebar icons */
-    section[data-testid="stSidebar"] svg {
-        fill: white !important;
-    }
+[data-testid="stToolbar"] button svg {
+    color: white !important;
+}
 
-    /* Buttons icons */
-    button svg {
-        fill: white !important;
-    }
+[data-testid="stToolbar"] button svg path {
+    fill: white !important;
+    stroke: white !important;
+}
 
 </style>
 """, unsafe_allow_html=True)
