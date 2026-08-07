@@ -274,13 +274,11 @@ span[data-testid="stIconMaterial"] {
 
 [data-testid="stToolbar"] button svg {
     color: white !important;
-    fill: white !important;
     stroke: white !important;
 }
 
 
 [data-testid="stToolbar"] button svg * {
-    fill: white !important;
     stroke: white !important;
 }
 
@@ -1534,13 +1532,6 @@ elif page == "Explainability":
                 n=min(1000, len(eval_sample)),
                 random_state=42
             )
-
-
-        if not hasattr(selected_model, "named_steps"):
-            st.warning(
-                "Logistic Regression preprocessing pipeline not found."
-            )
-            st.stop()
 
 
             # Transform data exactly as Logistic Regression sees it
