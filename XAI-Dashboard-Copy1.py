@@ -1495,36 +1495,98 @@ elif page == "Explainability":
             use_container_width=True
         )
 
-        if selected_model_name == "Logistic Regression": 
+        # if selected_model_name == "Logistic Regression": 
+        #     background = eval_sample.sample(
+        #         n=min(1000, len(eval_sample)),
+        #         random_state=42
+        #     )
+            
+        #     lr = selected_model.named_steps["lr"]
+            
+        #     explainer = shap.LinearExplainer(
+        #         lr,
+        #         background
+        #     )
+            
+        #     shap_values = explainer.shap_values(background)
+            
+        #     plt.figure(figsize=(13,6))
+
+        #     # plt.title(f"{selected_model_name} - SHAP Global Feature Importance")
+
+        #     st.subheader(f"{selected_model_name} - SHAP Global Feature Importance Beeswarm Plot")
+            
+        #     shap.summary_plot(
+        #         shap_values,
+        #         background,
+        #         show=False
+        #     )
+            
+        #     st.pyplot(plt.gcf())
+            
+        #     plt.close()
+
+
+
+        if selected_model_name == "Logistic Regression":
+
             background = eval_sample.sample(
                 n=min(1000, len(eval_sample)),
                 random_state=42
             )
-            
-            lr = selected_model.named_steps["lr"]
-            
-            explainer = shap.LinearExplainer(
-                lr,
+
+
+        if not hasattr(selected_model, "named_steps"):
+            st.warning(
+                "Logistic Regression preprocessing pipeline not found."
+            )
+            st.stop()
+
+
+            # Transform data exactly as Logistic Regression sees it
+            transformed_background = selected_model[:-1].transform(
                 background
             )
-            
-            shap_values = explainer.shap_values(background)
-            
+
+
+            lr = selected_model.named_steps["lr"]
+
+
+            explainer = shap.LinearExplainer(
+                lr,
+                transformed_background
+            )
+
+
+            shap_values = explainer.shap_values(
+                transformed_background
+            )
+
+
             plt.figure(figsize=(13,6))
 
-            # plt.title(f"{selected_model_name} - SHAP Global Feature Importance")
 
-            st.subheader(f"{selected_model_name} - SHAP Global Feature Importance Beeswarm Plot")
-            
+            st.subheader(
+                f"{selected_model_name} - SHAP Global Feature Importance Beeswarm Plot"
+            )
+
+
             shap.summary_plot(
                 shap_values,
-                background,
+                transformed_background,
                 show=False
             )
-            
-            st.pyplot(plt.gcf())
-            
+
+
+            st.pyplot(
+                plt.gcf()
+            )
+
+
             plt.close()
+
+
+
 
         if selected_model_name != "Logistic Regression":
             try:
