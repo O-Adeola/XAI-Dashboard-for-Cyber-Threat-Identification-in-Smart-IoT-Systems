@@ -85,10 +85,6 @@ div[data-testid="stToolbar"]{
     background:#1A40A3;
 }
 
-div[data-testid="stToolbarActionButtonIcon"]{
-    color:white !important;
-}
-
 header[data-testid="stHeader"] * {
     color: white !important;
 }
@@ -265,6 +261,29 @@ span[data-testid="stIconMaterial"] {
     fill: white !important;
     stroke: white !important;
 
+}
+
+/* =========================================================
+   STREAMLIT HEADER TOOLBAR ICONS
+   ========================================================= */
+
+header[data-testid="stHeader"] svg {
+    color: white !important;
+    fill: white !important;
+    stroke: white !important;
+}
+
+header[data-testid="stHeader"] svg path {
+    fill: white !important;
+    stroke: white !important;
+}
+
+header[data-testid="stHeader"] button {
+    color: white !important;
+}
+
+header[data-testid="stHeader"] button:hover {
+    background: rgba(255,255,255,0.15) !important;
 }
 
 </style>
