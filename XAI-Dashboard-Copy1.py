@@ -261,6 +261,10 @@ span[data-testid="stIconMaterial"] {
 
 }
 
+header[data-testid="stHeader"] {
+    --st-text-color: #FFFFFF !important;
+}
+
 /* =========================================================
    STREAMLIT HEADER TOOLBAR ICONS 
    ========================================================= */
