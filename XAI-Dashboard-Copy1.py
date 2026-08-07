@@ -85,7 +85,7 @@ div[data-testid="stToolbar"]{
     background:#1A40A3;
 }
 
-div[data-testid="stToolbarActions"]{
+div[data-testid="stToolbarActionButtonIcon"]{
     color:white !important;
 }
 
