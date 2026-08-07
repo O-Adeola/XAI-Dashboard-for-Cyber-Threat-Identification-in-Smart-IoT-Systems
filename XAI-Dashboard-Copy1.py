@@ -85,11 +85,15 @@ div[data-testid="stToolbar"]{
     background:#1A40A3;
 }
 
-button[data-testid="stExpandSidebarButton"]{
-    background:white !important;
+header[data-testid="stHeader"] * {
+    color: white !important;
 }
 
-button[data-testid="stBaseButton-headerNoPadding"]{
+/*button[data-testid="stExpandSidebarButton"]{
+    background:white !important;
+}*/
+
+/*button[data-testid="stBaseButton-headerNoPadding"]{
     background:white !important;
 }
 
@@ -99,7 +103,7 @@ button[data-testid="stBaseButton-header"]{
 
 button[data-testid="stMainMenuButton"]{
     color:white;
-}
+}*/
 
 /* Dropdown menu */
 ul[role="listbox"]{
@@ -210,6 +214,59 @@ font-size:32px;
 .hero p{
 color:#CBD5E1;
 font-size:12px;
+}
+
+/* =========================================================
+   SIDEBAR MENU / COLLAPSE BUTTON
+   ========================================================= */
+
+/* Sidebar closed hamburger button */
+[data-testid="stSidebarCollapsedControl"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 999999 !important;
+}
+
+
+/* Sidebar open collapse button */
+[data-testid="stSidebarCollapseButton"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 999999 !important;
+}
+
+
+/* Button itself */
+[data-testid="stSidebarCollapsedControl"] button,
+[data-testid="stSidebarCollapseButton"] button {
+
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+
+}
+
+[data-testid="stSidebarCollapsedControl"] div,
+[data-testid="stSidebarCollapseButton"] div {
+
+    background: transparent !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: none !important;
+
+}
+
+
+/* Icon */
+[data-testid="stSidebarCollapsedControl"] svg,
+[data-testid="stSidebarCollapseButton"] svg {
+
+    color: white !important;
+    fill: white !important;
+    stroke: white !important;
+
 }
 
 </style>
