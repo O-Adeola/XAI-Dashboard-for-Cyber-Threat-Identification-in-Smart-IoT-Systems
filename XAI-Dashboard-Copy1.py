@@ -263,10 +263,41 @@ span[data-testid="stIconMaterial"] {
 
 }
 
-/* Streamlit toolbar icons */
-[data-testid="stToolbar"] svg,
-[data-testid="stToolbar"] svg path {
+/* =========================================================
+   STREAMLIT HEADER TOOLBAR ICONS 
+   ========================================================= */
+
+/* Header buttons */
+header[data-testid="stHeader"] button {
     color: white !important;
+    background: transparent !important;
+}
+
+
+/* SVG icons */
+header[data-testid="stHeader"] button svg {
+    color: white !important;
+    fill: white !important;
+    stroke: white !important;
+}
+
+
+/* SVG paths */
+header[data-testid="stHeader"] button svg path {
+    fill: white !important;
+    stroke: white !important;
+}
+
+
+/* Toolbar icons */
+[data-testid="stToolbar"] button {
+    color: white !important;
+}
+
+
+[data-testid="stToolbar"] button svg {
+    color: white !important;
+    fill: white !important;
     stroke: white !important;
 }
 
