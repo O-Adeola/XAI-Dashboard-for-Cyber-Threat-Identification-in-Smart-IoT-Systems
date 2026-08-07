@@ -267,36 +267,21 @@ span[data-testid="stIconMaterial"] {
    STREAMLIT HEADER TOOLBAR ICONS 
    ========================================================= */
 
-/* Header container */
-header[data-testid="stHeader"] {
+[data-testid="stToolbar"] button {
     color: white !important;
 }
 
 
-/* Toolbar buttons */
-header[data-testid="stHeader"] button {
+[data-testid="stToolbar"] button svg {
     color: white !important;
-}
-
-
-/* All icon SVG elements */
-header[data-testid="stHeader"] button svg,
-header[data-testid="stHeader"] button svg * {
-
-    color: white !important;
+    fill: white !important;
     stroke: white !important;
-
 }
 
 
-/* Streamlit toolbar specifically */
-[data-testid="stToolbar"] button,
-[data-testid="stToolbar"] button svg,
 [data-testid="stToolbar"] button svg * {
-
-    color: white !important;
+    fill: white !important;
     stroke: white !important;
-
 }
 
 </style>
