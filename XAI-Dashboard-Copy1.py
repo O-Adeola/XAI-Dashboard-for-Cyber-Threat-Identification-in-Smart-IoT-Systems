@@ -216,9 +216,7 @@ color:#CBD5E1;
 font-size:12px;
 }
 
-/* =========================================================
-   SIDEBAR MENU / COLLAPSE BUTTON
-   ========================================================= */
+/* SIDEBAR MENU / COLLAPSE BUTTON */
 
 /* Sidebar closed hamburger button */
 [data-testid="stSidebarCollapsedControl"] {
@@ -267,20 +265,26 @@ span[data-testid="stIconMaterial"] {
    STREAMLIT HEADER TOOLBAR ICONS 
    ========================================================= */
 
-[data-testid="stToolbar"] button {
-    color: white !important;
-}
+    /* General Streamlit icons */
+    svg {
+        fill: white !important;
+        color: white !important;
+    }
 
+    /* Dropdown arrows */
+    div[data-baseweb="select"] svg {
+        fill: white !important;
+    }
 
-[data-testid="stToolbar"] button svg {
-    color: white !important;
-    stroke: white !important;
-}
+    /* Sidebar icons */
+    section[data-testid="stSidebar"] svg {
+        fill: white !important;
+    }
 
-
-[data-testid="stToolbar"] button svg * {
-    stroke: white !important;
-}
+    /* Buttons icons */
+    button svg {
+        fill: white !important;
+    }
 
 </style>
 """, unsafe_allow_html=True)
