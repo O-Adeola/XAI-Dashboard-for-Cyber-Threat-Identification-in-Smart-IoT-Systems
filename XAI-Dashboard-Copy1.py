@@ -265,12 +265,20 @@ header[data-testid="stHeader"] {
     --st-text-color: #FFFFFF !important;
 }
 
+header[data-testid="stHeader"] button,
+header[data-testid="stHeader"] button svg,
+header[data-testid="stHeader"] button svg * {
+    color: #FFFFFF !important;
+    fill: #FFFFFF !important;
+    stroke: #FFFFFF !important;
+}
+
 /* =========================================================
    STREAMLIT HEADER TOOLBAR ICONS 
    ========================================================= */
 
     /* General Streamlit icons */
-    svg {
+/*    svg {
         fill: white !important;
         color: white !important;
     }
@@ -288,7 +296,7 @@ header[data-testid="stHeader"] {
     /* Buttons icons */
     button svg {
         fill: white !important;
-    }
+    }*/
 
 </style>
 """, unsafe_allow_html=True)
