@@ -1441,7 +1441,7 @@ elif page == "Explainability":
 
             # plt.title(f"{selected_model_name} - SHAP Global Feature Importance")
 
-            st.subheader(f"{selected_model_name} - SHAP Global Feature Importance")
+            st.subheader(f"{selected_model_name} - SHAP Global Feature Importance Beeswarm Plot")
             
             shap.summary_plot(
                 shap_values,
@@ -1465,7 +1465,7 @@ elif page == "Explainability":
 
                 # plt.title(f"{selected_model_name} - SHAP Global Feature Importance")
 
-                st.subheader(f"{selected_model_name} - SHAP Global Feature Importance")
+                st.subheader(f"{selected_model_name} - SHAP Global Feature Importance Beeswarm Plot")
         
                 shap.summary_plot(shap_values_bg, background, show=False)
         
