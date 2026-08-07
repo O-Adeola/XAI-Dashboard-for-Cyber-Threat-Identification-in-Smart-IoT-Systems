@@ -85,6 +85,10 @@ div[data-testid="stToolbar"]{
     background:#1A40A3;
 }
 
+div[data-testid="stToolbarActions"]{
+    color:white !important;
+}
+
 header[data-testid="stHeader"] * {
     color: white !important;
 }
