@@ -769,14 +769,7 @@ if page == "Overview":
         c2.metric("Weighted F1", f'{top_row["Weighted_F1"]:.4f}')
         c3.metric("Accuracy", f'{top_row["Accuracy"]:.4f}')
         c4.metric("ROC AUC", f'{top_row["ROC_AUC"]:.4f}')
-    
-        st.subheader("Dataset and model summary")
-        summary_cols = st.columns(3)
-        summary_cols[0].metric("Features", len(feature_names))
-        summary_cols[1].metric("Attack classes", len(target_encoder.classes_))
-        summary_cols[2].metric("Evaluation rows", len(eval_sample))
-
-
+        
         st.subheader("Top model ranking")
         st.write("""
                 Models are ranked according to their weighted F1-score.
