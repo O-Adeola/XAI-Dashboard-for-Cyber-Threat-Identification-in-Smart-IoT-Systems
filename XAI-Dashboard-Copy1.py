@@ -711,12 +711,12 @@ results_df = results_df.sort_values(by="Weighted_F1", ascending=False).reset_ind
 page = st.sidebar.selectbox(
     "Go to",
     [
+        "About",
         "Overview",
         "Dataset Analysis",
         "Model Comparison",
         "Prediction",
-        "Explainability",
-        "About"
+        "Explainability"
     ],
     key="page_nav"
 )
@@ -740,7 +740,7 @@ st.markdown("""
 </h1>
 
 <p>
-Inspect predictions, and explain why a threat was flagged.
+Explore the dataset, compare machine-learning models, inspect predictions, and explain why a threat was flagged.
 </p>
 
 </div>
@@ -752,7 +752,7 @@ Inspect predictions, and explain why a threat was flagged.
 # ------------------------------
 if page == "Overview":
 
-    overview_page_tabs = st.tabs(["Overview", "Top Model Ranking", "Higher-is-better Metrics", "Lower-is-better Metrics"])
+    overview_page_tabs = st.tabs(["Overview", "Higher-is-better Metrics", "Lower-is-better Metrics"])
 
     with overview_page_tabs[0]:
         st.subheader("Overview") 
@@ -776,10 +776,9 @@ if page == "Overview":
         summary_cols[1].metric("Attack classes", len(target_encoder.classes_))
         summary_cols[2].metric("Evaluation rows", len(eval_sample))
 
-    with overview_page_tabs[1]:
+
         st.subheader("Top model ranking")
-        with st.expander("ℹ️ About this analysis"):
-            st.write("""
+        st.write("""
                 Models are ranked according to their weighted F1-score.
                 
                 The weighted F1-score considers both precision and recall while accounting for class
@@ -791,10 +790,9 @@ if page == "Overview":
             use_container_width=True
         )
 
-    with overview_page_tabs[2]:
+    with overview_page_tabs[1]:
         st.subheader("Higher-is-better metrics")
-        with st.expander("ℹ️ About this analysis"):
-            st.write("""
+        st.write("""
                 Higher metric values indicate better predictive performance.
                 
                 Accuracy measures overall correctness, Balanced Accuracy compensates for class imbalance,
@@ -822,10 +820,9 @@ if page == "Overview":
         st.pyplot(fig1)
         plt.close(fig1)
 
-    with overview_page_tabs[3]:
+    with overview_page_tabs[2]:
         st.subheader("Lower-is-better metrics")
-        with st.expander("ℹ️ About this analysis"):
-            st.write("""
+        st.write("""
                 Lower values are desirable for these metrics.
                 
                 Hamming Loss measures the proportion of incorrect predictions, while Log Loss evaluates
@@ -855,12 +852,12 @@ elif page == "Dataset Analysis":
             )
 
         st.write("""
-            This page provides a high-level overview of the selected dataset before model training.
-            
-            It presents exploratory data analysis (EDA) to help understand the characteristics of the dataset. 
+            This page presents exploratory data analysis (EDA) to help understand the characteristics of the dataset. 
             It includes the number of records, features and attack classes. It also reports missing values, 
             duplicate records exist and possible overfitting/underfitting, allowing users to quickly assess 
-            the quality of the data.
+            the quality of the data. 
+
+            The raw datasets were already processed and filtered for the use of evaluating traditional machine learning-based intrusion detection systems.
             """)
 
         eda = artifacts["eda"]
@@ -869,8 +866,8 @@ elif page == "Dataset Analysis":
 
             with dataset_analysis_tabs[1]:
                 with st.container():
-                    st.subheader("Performance Summary")
-                    c1,c2,c3 = st.columns(3)
+                    st.subheader("Dataset Information")
+                    c1,c2,c3,c4,c5 = st.columns(5)
             
                     c1.metric(
                         "Dataset Rows",
@@ -886,6 +883,16 @@ elif page == "Dataset Analysis":
                         "Duplicate Rows",
                         info["duplicates"]
                     )
+
+                    c4.metric(
+                        "Attack classes", 
+                        len(target_encoder.classes_)
+                    )
+                    
+                    c5.metric(
+                        "Evaluation rows", 
+                        len(eval_sample)
+                    )
                         
                     st.write(
                     "Attack Classes:"
@@ -898,8 +905,7 @@ elif page == "Dataset Analysis":
         with dataset_analysis_tabs[2]:
             st.subheader("Missing Value Analysis")
     
-            with st.expander("ℹ️ About this analysis"):
-                st.write("""
+            st.write("""
                     Missing values represent incomplete information within the dataset.
                     
                     Datasets containing many missing values can reduce prediction performance and may
@@ -955,10 +961,6 @@ elif page == "Model Comparison":
         styled_df = (
             results_df.style
             .format({col: "{:.4f}" for col in numeric_cols})
-            .highlight_max(
-                subset=["Accuracy","Balanced_Accuracy", "Weighted_F1","Macro_F1", "ROC_AUC"],
-                color="#d4edda"
-            )
         )
         
         st.dataframe(
@@ -978,8 +980,7 @@ elif page == "Model Comparison":
     with model_comparison_tabs[1]:
         st.subheader("Confusion Matrix on saved evaluation sample")
     
-        with st.expander("ℹ️ About this analysis"):
-            st.write("""
+        st.write("""
                 The confusion matrix compares actual attack labels against predicted labels.
                 
                 Values along the diagonal represent correct classifications, while values outside
@@ -1014,8 +1015,7 @@ elif page == "Model Comparison":
     with model_comparison_tabs[2]:
         st.subheader("Classification report")
     
-        with st.expander("ℹ️ About this analysis"):
-            st.write("""
+        st.write("""
                 The classification report provides Precision, Recall and F1-score for every attack class.
                 
                 These metrics help identify which attacks are detected reliably and which attack
@@ -1036,6 +1036,16 @@ elif page == "Model Comparison":
 # ------------------------------
 elif page == "About":
     # st.header("🛡️ XAI Dashboard for Cyber Threat Identification in Smart IoT Systems")
+    st.info("""
+        This dashboard uses machine learning to analyse IoT network activity
+        and identify potentially malicious behaviour.
+        
+        It allows users to explore the data, check its quality, compare
+        different machine-learning models, make predictions, and understand
+        why the model made a particular decision.
+        """)
+    
+    
     about_page_tabs = st.tabs([
         "About this Dashboard", "Machine Learning Models Used", "Understanding Model Evaluation Metrics", "Dashboard Pages", "What a User Gets From This System"])
 
@@ -1053,13 +1063,20 @@ elif page == "About":
             Unlike traditional intrusion detection systems that simply classify traffic, this dashboard provides 
             transparent, interpretable and trustworthy explanations so that security analysts can
             understand the reasoning behind every prediction.
-            
-            The system performs three main tasks:
-            1. Understand the IoT dataset
-            2. Identify cyber attacks using machine learning models
-            3. Explain why the model made a particular decision
             """
         )
+
+        st.subheader("How the system works")
+    
+        st.write("""
+            The system follows a simple process:
+            
+            1. The dataset is explored and checked for data-quality issues.
+            2. Machine-learning models learn patterns from the network data.
+            3. The models are evaluated to see how reliably they classify different types of network activity.
+            4. A selected model can be used to analyse a network record for potential cyber attacks.
+            5. Explainable AI shows which features influenced the prediction.
+            """)
 
     with about_page_tabs[1]:
         st.subheader("Machine Learning Models Used")
@@ -1342,8 +1359,7 @@ elif page == "Prediction":
                 styled_table(proba_df),
                 use_container_width=True
             )
-            with st.expander("ℹ️ About this analysis"):
-                st.write("""
+            st.write("""
                     Rather than only predicting one class, the model estimates the probability of
                     every possible attack category.
                     
@@ -1369,8 +1385,7 @@ elif page == "Prediction":
 # PAGE: EXPLAINABILITY
 # ------------------------------
 elif page == "Explainability":
-    with st.expander("ℹ️ About this analysis"):
-        st.write("""
+    st.write("""
             Explainable Artificial Intelligence (XAI) helps users understand why the model
             made a particular decision rather than simply displaying the prediction.
             
@@ -1414,8 +1429,7 @@ elif page == "Explainability":
     with model_type_tabs[0]:
         st.subheader("Local explanation")
 
-        with st.expander("ℹ️ About this analysis"):
-            st.write("""
+        st.write("""
                 Local explanations describe why the model classified one individual network record.
                 
                 SHAP values identify which features increased or decreased the likelihood of the
@@ -1453,8 +1467,7 @@ elif page == "Explainability":
     with model_type_tabs[1]:
         st.subheader("Global feature importance")
 
-        with st.expander("ℹ️ About this analysis"):
-            st.write("""
+        st.write("""
                 Global feature importance summarises which variables influenced the model most
                 across the entire dataset.
                 
@@ -1584,8 +1597,7 @@ elif page == "Explainability":
     # 3) REASONING
     with model_type_tabs[2]:
 
-        with st.expander("ℹ️ About this analysis"):
-            st.write("""
+        st.write("""
                 The reasoning section translates technical explainability outputs into an
                 analyst-friendly explanation.
                 

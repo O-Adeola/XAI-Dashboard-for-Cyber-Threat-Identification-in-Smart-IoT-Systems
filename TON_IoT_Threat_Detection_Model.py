@@ -29,21 +29,6 @@ import shap
 import joblib
 
 
-PROJECT_DIR = Path.cwd()
-
-DATASET_DIR = (
-    PROJECT_DIR /
-    "datasets" /
-    "TON_IoT"
-)
-
-MODEL_DIR = DATASET_DIR / "models"
-ARTIFACTS_DIR = DATASET_DIR / "artifacts"
-
-MODEL_DIR.mkdir(parents=True, exist_ok=True)
-ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
-
-
 pd.set_option('display.max_columns', None)
 
 
@@ -59,6 +44,16 @@ df.head()
 
 
 # In[3]:
+
+
+df.info()
+
+df.shape
+
+df.duplicated().sum()
+
+
+# In[4]:
 
 
 #===================
@@ -79,7 +74,7 @@ df.replace([np.inf, -np.inf], np.nan, inplace=True)
 df.fillna(0, inplace=True)
 
 
-# In[4]:
+# In[5]:
 
 
 # ==================================
@@ -94,8 +89,11 @@ dataset_quality = {
     "missing_values": int(missing_before),
 }
 
+print(missing_before)
+print(dataset_quality)
 
-# In[5]:
+
+# In[6]:
 
 
 #===================
@@ -113,7 +111,7 @@ plt.title("Attack Class Distribution")
 plt.show()
 
 
-# In[6]:
+# In[7]:
 
 
 #DROP COLUMNS 
@@ -131,14 +129,21 @@ drop_cols = ["src_ip",
 df = df.drop(columns=drop_cols, errors="ignore")
 
 
-# In[7]:
+
+df = df.drop_duplicates()
+
+print("Shape after cleaning:", df.shape)
+print(df["type"].value_counts())
+
+
+# In[8]:
 
 
 dataset_quality["features_after_preprocessing"] = len(df.columns)
 dataset_quality["removed_columns"] = drop_cols
 
 
-# In[8]:
+# In[9]:
 
 
 #===================
@@ -178,7 +183,7 @@ print("Validation:", X_val.shape)
 print("Test:", X_test.shape)
 
 
-# In[9]:
+# In[10]:
 
 
 X_train = X_train.copy()
@@ -186,7 +191,7 @@ X_val = X_val.copy()
 X_test = X_test.copy()
 
 
-# In[10]:
+# In[11]:
 
 
 # ==================================
@@ -215,14 +220,14 @@ X_test[cat_cols] = encoder.transform(
 )
 
 
-# In[11]:
+# In[12]:
 
 
 dataset_quality["categorical_features"] = list(cat_cols)
 dataset_quality["selected_features"] = list(X_train.columns)
 
 
-# In[12]:
+# In[13]:
 
 
 # ==================================
@@ -349,7 +354,7 @@ def evaluate_model(model_name, model, X_data, y_true):
     ]
 
 
-# In[13]:
+# In[14]:
 
 
 # ==================================
@@ -359,7 +364,7 @@ def evaluate_model(model_name, model, X_data, y_true):
 results = []
 
 
-# In[14]:
+# In[15]:
 
 
 # clean_df.to_csv(
@@ -368,7 +373,7 @@ results = []
 # )
 
 
-# In[15]:
+# In[16]:
 
 
 # training_summary = pd.DataFrame({
@@ -383,7 +388,17 @@ results = []
 # )
 
 
-# In[16]:
+# In[17]:
+
+
+df.info()
+
+df.shape
+
+df.duplicated().sum()
+
+
+# In[18]:
 
 
 #===================
@@ -430,7 +445,7 @@ results.append(
 )
 
 
-# In[17]:
+# In[19]:
 
 
 #===================
@@ -465,7 +480,7 @@ results.append(
 )
 
 
-# In[18]:
+# In[20]:
 
 
 #===================
@@ -504,7 +519,7 @@ results.append(
 )
 
 
-# In[19]:
+# In[21]:
 
 
 #===================
@@ -542,7 +557,7 @@ results.append(
 )
 
 
-# In[20]:
+# In[22]:
 
 
 #===================
@@ -590,7 +605,7 @@ results.append(
 )
 
 
-# In[21]:
+# In[23]:
 
 
 # ==================================
@@ -622,6 +637,8 @@ for name, model in {
 dataset_quality["training_accuracy"] = training_scores
 dataset_quality["testing_accuracy"] = testing_scores
 
+print(dataset_quality)
+
 dataset_quality["overfitting"] = {
     model: (
         training_scores[model]
@@ -631,7 +648,24 @@ dataset_quality["overfitting"] = {
 }
 
 
-# In[22]:
+
+print("\nModel Accuracy and Overfitting Gap:")
+print("-" * 60)
+
+for model in training_scores:
+    train = training_scores[model]
+    test = testing_scores[model]
+    gap = train - test
+
+    print(
+        f"{model:<20} "
+        f"Train: {train:.2%} | "
+        f"Test: {test:.2%} | "
+        f"Gap: {gap:.2%}"
+    )
+
+
+# In[24]:
 
 
 # ==================================
@@ -665,7 +699,7 @@ results_df = results_df.sort_values(
 results_df
 
 
-# In[23]:
+# In[25]:
 
 
 # ==================================
@@ -698,7 +732,7 @@ plt.tight_layout()
 plt.show()
 
 
-# In[24]:
+# In[26]:
 
 
 # ==================================
@@ -723,7 +757,7 @@ plt.tight_layout()
 plt.show()
 
 
-# In[25]:
+# In[27]:
 
 
 # ==================================
@@ -749,7 +783,7 @@ def show_confusion_matrix(model_name, model, X_data, y_true):
     plt.show()
 
 
-# In[26]:
+# In[28]:
 
 
 top_models = {
@@ -764,7 +798,7 @@ for name, model in top_models.items():
     show_confusion_matrix(name, model, X_test, y_test)
 
 
-# In[27]:
+# In[29]:
 
 
 # ==================================
@@ -973,7 +1007,7 @@ def plot_feature_importance(model, model_name, feature_names):
     return importance_df
 
 
-# In[28]:
+# In[30]:
 
 
 rf_importance = plot_feature_importance(
@@ -983,7 +1017,7 @@ rf_importance = plot_feature_importance(
 )
 
 
-# In[29]:
+# In[31]:
 
 
 dt_importance = plot_feature_importance(
@@ -993,7 +1027,7 @@ dt_importance = plot_feature_importance(
 )
 
 
-# In[30]:
+# In[32]:
 
 
 lgb_importance = plot_feature_importance(
@@ -1003,7 +1037,7 @@ lgb_importance = plot_feature_importance(
 )
 
 
-# In[31]:
+# In[33]:
 
 
 xgb_importance = plot_feature_importance(
@@ -1013,7 +1047,7 @@ xgb_importance = plot_feature_importance(
 )
 
 
-# In[32]:
+# In[34]:
 
 
 lr_importance = plot_feature_importance(
@@ -1023,7 +1057,7 @@ lr_importance = plot_feature_importance(
 )
 
 
-# In[33]:
+# In[35]:
 
 
 feature_importance = {
@@ -1041,7 +1075,7 @@ feature_importance = {
 
 
 
-# In[34]:
+# In[36]:
 
 
 # #===================
@@ -1054,7 +1088,7 @@ feature_importance = {
 # plt.show()
 
 
-# In[35]:
+# In[37]:
 
 
 # # ==================================
@@ -1074,7 +1108,7 @@ feature_importance = {
 # feature_importance.head(20)
 
 
-# In[36]:
+# In[38]:
 
 
 # # TOP 20 IMPORTANT FEATURES
@@ -1098,7 +1132,7 @@ feature_importance = {
 # plt.show()
 
 
-# In[37]:
+# In[39]:
 
 
 sample = X_test.sample(
@@ -1107,7 +1141,7 @@ sample = X_test.sample(
 )
 
 
-# In[38]:
+# In[40]:
 
 
 # ==================================
@@ -1121,7 +1155,7 @@ rf_shap_values = rf_explainer.shap_values(
 )
 
 
-# In[39]:
+# In[41]:
 
 
 #RF SHAP SUMMARY PLOT 
@@ -1131,7 +1165,7 @@ shap.summary_plot(
 )
 
 
-# In[40]:
+# In[42]:
 
 
 #RF SHAP BAR PLOT
@@ -1142,7 +1176,7 @@ shap.summary_plot(
 )
 
 
-# In[41]:
+# In[43]:
 
 
 # ==================================
@@ -1156,7 +1190,7 @@ dt_shap_values = dt_explainer.shap_values(
 )
 
 
-# In[42]:
+# In[44]:
 
 
 #DT SHAP SUMMARY PLOT 
@@ -1166,7 +1200,7 @@ shap.summary_plot(
 )
 
 
-# In[43]:
+# In[45]:
 
 
 #DT SHAP BAR PLOT
@@ -1177,7 +1211,7 @@ shap.summary_plot(
 )
 
 
-# In[44]:
+# In[46]:
 
 
 # ==================================
@@ -1191,7 +1225,7 @@ lgb_shap_values = lgb_explainer.shap_values(
 )
 
 
-# In[45]:
+# In[47]:
 
 
 #LGB SHAP SUMMARY PLOT 
@@ -1201,7 +1235,7 @@ shap.summary_plot(
 )
 
 
-# In[46]:
+# In[48]:
 
 
 #LGB SHAP BAR PLOT
@@ -1212,7 +1246,7 @@ shap.summary_plot(
 )
 
 
-# In[47]:
+# In[49]:
 
 
 # ==================================
@@ -1226,7 +1260,7 @@ xgb_shap_values = xgb_explainer.shap_values(
 )
 
 
-# In[48]:
+# In[50]:
 
 
 #XGB SHAP SUMMARY PLOT
@@ -1236,7 +1270,7 @@ shap.summary_plot(
 )
 
 
-# In[49]:
+# In[51]:
 
 
 #XGB SHAP BAR PLOT
@@ -1247,7 +1281,7 @@ shap.summary_plot(
 )
 
 
-# In[50]:
+# In[52]:
 
 
 # ==================================
@@ -1351,7 +1385,7 @@ shap.summary_plot(lr_shap_values.values, sample, feature_names=sample.columns)
 #     )
 
 
-# In[51]:
+# In[53]:
 
 
 #LR SHAP SUMMARY PLOT
@@ -1361,7 +1395,7 @@ shap.summary_plot(
 )
 
 
-# In[52]:
+# In[54]:
 
 
 #LR SHAP BAR PLOT
@@ -1372,7 +1406,7 @@ shap.summary_plot(
 )
 
 
-# In[53]:
+# In[58]:
 
 
 print(type(rf_shap_values))
@@ -1382,11 +1416,11 @@ row_idx = 0
 class_idx = 0
 
 print(rf_shap_values[class_idx][row_idx].shape)
-print(single_row.shape)
-print(X_sample.shape)
+# print(single_row.shape)
+# print(X_sample.shape)
 
 
-# In[54]:
+# In[59]:
 
 
 #EXPLAIN RF PREDICTION 
@@ -1534,7 +1568,7 @@ shap.force_plot(
 )
 
 
-# In[55]:
+# In[60]:
 
 
 #EXPLAIN DT PREDICTION 
@@ -1575,7 +1609,7 @@ shap.plots.force(
 )
 
 
-# In[56]:
+# In[61]:
 
 
 #EXPLAIN LGB PREDICTION 
@@ -1616,7 +1650,7 @@ shap.plots.force(
 )
 
 
-# In[57]:
+# In[62]:
 
 
 #EXPLAIN XGB PREDICTION 
@@ -1657,14 +1691,14 @@ shap.plots.force(
 )
 
 
-# In[58]:
+# In[63]:
 
 
 print(type(lr_shap_values))
 print(np.array(lr_shap_values).shape)
 
 
-# In[59]:
+# In[64]:
 
 
 #EXPLAIN LR PREDICTION 
@@ -1894,7 +1928,7 @@ shap.plots.beeswarm(lr_shap_values[:, :, pred_class])
 shap.plots.force(lr_shap_values[row_idx, :, pred_class])
 
 
-# In[60]:
+# In[65]:
 
 
 # from pathlib import Path
@@ -1956,7 +1990,27 @@ shap.plots.force(lr_shap_values[row_idx, :, pred_class])
 # joblib.dump(eval_labels, ARTIFACTS_DIR / "eval_labels.pkl")
 
 
-# In[74]:
+# In[66]:
+
+
+from pathlib import Path
+import joblib
+from sklearn.metrics import classification_report
+import pandas as pd
+
+PROJECT_DIR = Path.cwd()
+
+DATASET_DIR = (
+    PROJECT_DIR /
+    "datasets" /
+    "TON_IoT"
+)
+
+MODEL_DIR = DATASET_DIR / "models"
+ARTIFACTS_DIR = DATASET_DIR / "artifacts"
+
+MODEL_DIR.mkdir(parents=True, exist_ok=True)
+ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 
@@ -2061,7 +2115,7 @@ joblib.dump(
 )
 
 
-# In[62]:
+# In[67]:
 
 
 joblib.dump(dataset_quality,
@@ -2083,7 +2137,15 @@ joblib.dump(feature_importance,
             ARTIFACTS_DIR / "feature_importance.pkl")
 
 
-# In[63]:
+# In[68]:
+
+
+df.duplicated().sum()
+
+# df.shape
+
+
+# In[69]:
 
 
 EDA_DIR = ARTIFACTS_DIR / "eda"
@@ -2121,11 +2183,10 @@ dataset_info = {
     "columns": df.shape[1],
 
     "duplicates":
-        df.duplicated().sum(),
+        df.duplicated().sum(), 
 
     "classes":
         target_encoder.classes_.tolist()
-
 }
 
 
@@ -2157,7 +2218,29 @@ joblib.dump(
 )
 
 
-# In[64]:
+# In[70]:
+
+
+df.duplicated().sum()
+
+
+# In[71]:
+
+
+import pickle
+
+with open(EDA_DIR / "dataset_info.pkl", "rb") as f:
+    data = pickle.load(f)
+
+print(type(data))
+
+if hasattr(data, "shape"):
+    print("Shape:", data.shape)
+
+print(data)
+
+
+# In[72]:
 
 
 training_scores={}
@@ -2193,7 +2276,7 @@ joblib.dump(
 )
 
 
-# In[65]:
+# In[73]:
 
 
 numeric_features=df.select_dtypes(
@@ -2219,14 +2302,14 @@ EDA_DIR/"numeric_features.pkl"
 
 
 
-# In[66]:
+# In[74]:
 
 
 predictedValue = rf.predict(X_test)
 print(predictedValue)
 
 
-# In[67]:
+# In[75]:
 
 
 rf_preds = rf.predict(X_test)
@@ -2245,7 +2328,7 @@ comparison_df.head(20)
 
 
 
-# In[68]:
+# In[76]:
 
 
 from pathlib import Path
@@ -2289,7 +2372,7 @@ for root, dirs, files in os.walk(BASE_DIR):
         print()
 
 
-# In[69]:
+# In[77]:
 
 
 import pandas as pd
@@ -2320,7 +2403,7 @@ for file in results_files:
     display(df.head())
 
 
-# In[70]:
+# In[78]:
 
 
 from pathlib import Path
