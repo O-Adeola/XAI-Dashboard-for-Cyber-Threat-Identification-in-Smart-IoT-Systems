@@ -15,7 +15,7 @@ import seaborn as sns
 
 from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.preprocessing import LabelEncoder, StandardScaler, OrdinalEncoder, OneHotEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import classification_report, accuracy_score, balanced_accuracy_score, f1_score, accuracy_score, precision_score, recall_score, ConfusionMatrixDisplay, cohen_kappa_score, hamming_loss, roc_auc_score, log_loss
 from pathlib import Path
@@ -53,7 +53,9 @@ ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
 #===================
 #LOAD DATASETS 
 #===================
-df = pd.read_csv("C:\\Users\\User\\Downloads\\ML-EdgeIIoT-dataset.csv\\ML-EdgeIIoT-dataset.csv", low_memory=False)
+raw_df = pd.read_csv("C:\\Users\\User\\Downloads\\ML-EdgeIIoT-dataset.csv\\ML-EdgeIIoT-dataset.csv", low_memory=False)
+
+df = raw_df.copy()
 
 df.head()
 
@@ -67,14 +69,72 @@ df.head()
 print("Shape:", df.shape)
 print(df.columns)
 print(df.info())
+print(df.nunique())
+print(df.describe())
 print(df["Attack_type"].value_counts())
+
+print("Duplicates before cleaning:", df.duplicated().sum())
 
 
 # In[4]:
 
 
+# ==================================
+# DATASET QUALITY
+# ==================================
+
+missing_before = df.isnull().sum().sum()
+
+# missing_summary = pd.DataFrame({
+#     "Feature": missing_values.index,
+#     "Missing Values": missing_values.values,
+#     "Percent Missing":
+#         (missing_values.values / len(df)) * 100
+# })
+
+
+dataset_quality = {
+    "rows": len(df),
+    "columns": len(df.columns),
+    "missing_values": int(missing_before),
+}
+
+print(missing_before)
+print(dataset_quality)
+print(df["Attack_type"].value_counts())
+
+
+# In[5]:
+
+
 #===================
-#CLEAN DATASET  
+#LABEL DISTRIBUTION
+#===================
+df['Attack_type'].value_counts() 
+
+plt.figure(figsize=(12,6))
+
+df['Attack_type'].value_counts().plot(
+    kind='bar'
+)
+
+plt.title("Attack Class Distribution Before Cleaning")
+# plt.show()
+
+
+plt.savefig(
+    ARTIFACTS_DIR /
+    "attack_distribution.png"
+)
+
+plt.show()
+
+
+# In[6]:
+
+
+#===================
+#CLEAN AND PREPARE DATASET  
 #===================
 drop_columns = [
     "frame.time", "ip.src_host", "ip.dst_host", "arp.src.proto_ipv4",
@@ -87,8 +147,27 @@ drop_columns = [c for c in drop_columns if c in df.columns]
 df = df.drop(columns=drop_columns)
 
 
-df = df.dropna(axis=0, how="any")
+# df = df.dropna(axis=0, how="any")
+
+duplicates_before = int(
+    df.duplicated().sum()
+)
+
+
 df = df.drop_duplicates()
+
+
+duplicates_after = int(
+    df.duplicated().sum()
+)
+
+duplicates_removed = (
+    duplicates_before -
+    duplicates_after
+)
+
+
+
 df = shuffle(df, random_state=42).reset_index(drop=True)
 
 print("Shape after cleaning:", df.shape)
@@ -114,7 +193,17 @@ print(df["Attack_type"].value_counts())
 # df.fillna(0, inplace=True)
 
 
-# In[5]:
+# In[7]:
+
+
+#===================
+#DATASET QUALITY/PREPROCESSING REPORT  
+#===================
+dataset_quality["features_after_preprocessing"] = len(df.columns)
+dataset_quality["removed_columns"] = drop_columns
+
+
+# In[8]:
 
 
 # ==================================
@@ -124,54 +213,53 @@ print(df["Attack_type"].value_counts())
 clean_df = df.copy()
 
 
-# In[88]:
+# In[ ]:
+
+
+
+
+
+# In[9]:
+
+
+# # ==================================
+# # DATASET QUALITY
+# # ==================================
+
+# missing_values_after = df.isnull().sum()
+
+# missing_summary_after = pd.DataFrame({
+#     "Feature": missing_values.index,
+#     "Missing Values": missing_values.values,
+#     "Percent Missing":
+#         (missing_values.values / len(df)) * 100
+# })
+
+# print(missing_values_after)
+# print(missing_summary_after)
+
+
+# In[10]:
 
 
 # ==================================
-# DATASET QUALITY
+# DATASET QUALITY INFORMATION AFTER CLEANING
 # ==================================
 
-missing_values = df.isnull().sum()
+missing_after = df.isnull().sum().sum()
 
-missing_summary = pd.DataFrame({
-    "Feature": missing_values.index,
-    "Missing Values": missing_values.values,
-    "Percent Missing":
-        (missing_values.values / len(df)) * 100
-})
+dataset_quality_after = {
+    "rows": len(df),
+    "columns": len(df.columns),
+    "missing_values": int(missing_after),
+}
 
-print(missing_summary)
-
-
-# In[7]:
+print(missing_after)
+print(dataset_quality_after)
+print(df["Attack_type"].value_counts())
 
 
-#===================
-#ENCODE CATEGORICAL COLUMNS 
-#===================
-def encode_text_dummy(df, name):
-    if name in df.columns:
-        dummies = pd.get_dummies(df[name], prefix=name)
-        df = pd.concat([df.drop(columns=[name]), dummies], axis=1)
-    return df
-
-categorical_to_encode = [
-    "http.request.method",
-    "http.referer",
-    "http.request.version",
-    "dns.qry.name.len",
-    "mqtt.conack.flags",
-    "mqtt.protoname",
-    "mqtt.topic"
-]
-
-for col in categorical_to_encode:
-    df = encode_text_dummy(df, col)
-
-print("Shape after dummy encoding:", df.shape)
-
-
-# In[8]:
+# In[11]:
 
 
 # target_col = "Attack_type"
@@ -186,7 +274,7 @@ print("Shape after dummy encoding:", df.shape)
 # print("X shape:", X.shape)
 
 
-# In[86]:
+# In[12]:
 
 
 #===================
@@ -200,7 +288,7 @@ df['Attack_type'].value_counts().plot(
     kind='bar'
 )
 
-plt.title("Attack Class Distribution")
+plt.title("Attack Class Distribution After Cleaning")
 # plt.show()
 
 
@@ -212,7 +300,7 @@ plt.savefig(
 plt.show()
 
 
-# In[10]:
+# In[13]:
 
 
 #DROP IP ADDRESSES 
@@ -230,7 +318,7 @@ plt.show()
 # df = df.drop(columns=drop_cols, errors="ignore")
 
 
-# In[11]:
+# In[14]:
 
 
 # ===================
@@ -238,11 +326,20 @@ plt.show()
 # TRAIN-VALIDATE-TEST 
 # ===================
 
-df = df.dropna(subset=["Attack_type"])
+# df = df.dropna(subset=["Attack_type"])
 
-X = df.drop(columns=["Attack_type"])
+import re
+
+df.columns = df.columns.astype(str).str.replace(
+    r"[^0-9a-zA-Z_]", "_", regex=True
+)
+
+X = df.drop(columns=["Attack_label", "Attack_type"])
 y = df["Attack_type"]
 
+
+
+#FIT ENCODER
 target_encoder = LabelEncoder()
 y_enc = target_encoder.fit_transform(y)
 
@@ -252,24 +349,20 @@ print(target_encoder.classes_)
 print(np.unique(y))
 
 
-# In[12]:
+# In[ ]:
 
 
-import re
-
-df.columns = df.columns.astype(str).str.replace(
-    r"[^0-9a-zA-Z_]", "_", regex=True
-)
 
 
-# In[13]:
+
+# In[15]:
 
 
-X = df.drop(columns=["Attack_type"])
-y = df["Attack_type"]
+# X = df.drop(columns=["Attack_type"])
+# y = df["Attack_type"]
 
 
-# In[14]:
+# In[16]:
 
 
 X_train, X_temp, y_train, y_temp = train_test_split(
@@ -293,7 +386,38 @@ print("Validation:", X_val.shape)
 print("Test:", X_test.shape)
 
 
-# In[15]:
+# In[ ]:
+
+
+
+
+
+# In[17]:
+
+
+print(X_train.dtypes)
+
+
+
+cat_cols = X_train.select_dtypes(
+    include=["object", "string"]
+).columns.tolist()
+
+for col in cat_cols:
+    print(
+        col,
+        "unique:", X_train[col].nunique(),
+        "examples:", X_train[col].dropna().unique()[:10]
+    )
+
+
+# In[ ]:
+
+
+
+
+
+# In[18]:
 
 
 X_train = X_train.copy()
@@ -301,20 +425,53 @@ X_val = X_val.copy()
 X_test = X_test.copy()
 
 
-# In[16]:
+# In[19]:
 
 
-# # ==================================
-# # FEATURE (ORDINAL) ENCODING
-# # ==================================
+# #===================
+# #ENCODE CATEGORICAL COLUMNS 
+# #===================
+# def encode_text_dummy(df, name):
+#     if name in df.columns:
+#         dummies = pd.get_dummies(df[name], prefix=name)
+#         df = pd.concat([df.drop(columns=[name]), dummies], axis=1)
+#     return df
+
+# categorical_to_encode = [
+#     "http.request.method",
+#     "http.referer",
+#     "http.request.version",
+#     "dns.qry.name.len",
+#     "mqtt.conack.flags",
+#     "mqtt.protoname",
+#     "mqtt.topic"
+# ]
+
+# for col in categorical_to_encode:
+#     df = encode_text_dummy(df, col)
+
+# print("Shape after dummy encoding:", df.shape)
+
+
+# In[20]:
+
+
+# ==================================
+# FEATURE (ORDINAL) ENCODING
+# ==================================
 
 # cat_cols = X_train.select_dtypes(
 #     include=["object", "string"]
 # ).columns
 
-# encoder = OrdinalEncoder(
-#     handle_unknown="use_encoded_value",
-#     unknown_value=-1
+encoder = OrdinalEncoder(
+    handle_unknown="use_encoded_value",
+    unknown_value=-1
+)
+
+# encoder = OneHotEncoder(
+#     handle_unknown="ignore",
+#     sparse_output=False
 # )
 
 # X_train[cat_cols] = encoder.fit_transform(
@@ -330,7 +487,82 @@ X_test = X_test.copy()
 # )
 
 
-# In[17]:
+
+
+# Fit ONLY on training data
+X_train_encoded = encoder.fit_transform(X_train[cat_cols])
+
+# Transform validation and test
+X_val_encoded = encoder.transform(X_val[cat_cols])
+X_test_encoded = encoder.transform(X_test[cat_cols])
+
+# Get names for the new dummy columns
+encoded_cols = encoder.get_feature_names_out(cat_cols)
+
+# Convert encoded arrays into DataFrames
+X_train_encoded = pd.DataFrame(
+    X_train_encoded,
+    columns=encoded_cols,
+    index=X_train.index
+)
+
+X_val_encoded = pd.DataFrame(
+    X_val_encoded,
+    columns=encoded_cols,
+    index=X_val.index
+)
+
+X_test_encoded = pd.DataFrame(
+    X_test_encoded,
+    columns=encoded_cols,
+    index=X_test.index
+)
+
+# Remove original categorical columns
+X_train = X_train.drop(columns=cat_cols)
+X_val = X_val.drop(columns=cat_cols)
+X_test = X_test.drop(columns=cat_cols)
+
+# Add encoded columns
+X_train = pd.concat([X_train, X_train_encoded], axis=1)
+X_val = pd.concat([X_val, X_val_encoded], axis=1)
+X_test = pd.concat([X_test, X_test_encoded], axis=1)
+
+print("Train:", X_train.shape)
+print("Validation:", X_val.shape)
+print("Test:", X_test.shape)
+
+
+# In[21]:
+
+
+import re
+
+def clean_feature_names(df):
+    df = df.copy()
+    df.columns = (
+        df.columns
+        .astype(str)
+        .str.replace(r"[^0-9a-zA-Z_]", "_", regex=True)
+        .str.replace(r"_+", "_", regex=True)
+        .str.strip("_")
+    )
+    return df
+
+
+X_train = clean_feature_names(X_train)
+X_val = clean_feature_names(X_val)
+X_test = clean_feature_names(X_test)
+
+
+# In[22]:
+
+
+dataset_quality["categorical_features"] = list(cat_cols)
+dataset_quality["selected_features"] = list(X_train.columns)
+
+
+# In[23]:
 
 
 # ==================================
@@ -457,7 +689,7 @@ def evaluate_model(model_name, model, X_data, y_true):
     ]
 
 
-# In[18]:
+# In[24]:
 
 
 # ==================================
@@ -467,7 +699,7 @@ def evaluate_model(model_name, model, X_data, y_true):
 results = []
 
 
-# In[19]:
+# In[25]:
 
 
 # clean_df.to_csv(
@@ -476,7 +708,7 @@ results = []
 # )
 
 
-# In[20]:
+# In[26]:
 
 
 # training_summary = pd.DataFrame({
@@ -491,7 +723,7 @@ results = []
 # )
 
 
-# In[21]:
+# In[27]:
 
 
 # ==================================
@@ -507,6 +739,7 @@ df[numeric_columns].iloc[:, :20].boxplot(
 )
 
 plt.tight_layout()
+plt.show()
 
 plt.savefig(
     ARTIFACTS_DIR /
@@ -516,7 +749,7 @@ plt.savefig(
 plt.close()
 
 
-# In[22]:
+# In[28]:
 
 
 # ==================================
@@ -534,6 +767,7 @@ sns.heatmap(
 )
 
 plt.tight_layout()
+plt.show()
 
 plt.savefig(
     ARTIFACTS_DIR /
@@ -543,7 +777,7 @@ plt.savefig(
 plt.close()
 
 
-# In[23]:
+# In[29]:
 
 
 #===================
@@ -590,7 +824,7 @@ results.append(
 )
 
 
-# In[24]:
+# In[30]:
 
 
 #===================
@@ -625,7 +859,7 @@ results.append(
 )
 
 
-# In[25]:
+# In[31]:
 
 
 #===================
@@ -663,7 +897,7 @@ results.append(
 )
 
 
-# In[26]:
+# In[32]:
 
 
 # # ===================
@@ -685,7 +919,7 @@ results.append(
 # print(np.unique(y))
 
 
-# In[27]:
+# In[33]:
 
 
 #===================
@@ -725,7 +959,7 @@ results.append(
 )
 
 
-# In[28]:
+# In[34]:
 
 
 #===================
@@ -779,7 +1013,67 @@ results.append(
 )
 
 
-# In[29]:
+# In[35]:
+
+
+# ==================================
+# CHECK FOR OVERFITTING
+# ==================================
+
+training_scores = {}
+
+testing_scores = {}
+
+for name, model in {
+    "Random Forest": rf,
+    "Decision Tree": dt,
+    "LightGBM": lgb,
+    "XGBoost": xgb,
+    "Logistic Regression": lr_pipeline
+}.items():
+
+    train_acc = model.score(X_train, y_train)
+
+    test_acc = accuracy_score(
+        y_test,
+        model.predict(X_test)
+    )
+
+    training_scores[name] = train_acc
+    testing_scores[name] = test_acc
+
+dataset_quality["training_accuracy"] = training_scores
+dataset_quality["testing_accuracy"] = testing_scores
+
+print(dataset_quality)
+
+dataset_quality["overfitting"] = {
+    model: (
+        training_scores[model]
+        - testing_scores[model]
+    )
+    for model in training_scores
+}
+
+
+
+print("\nModel Accuracy and Overfitting Gap:")
+print("-" * 60)
+
+for model in training_scores:
+    train = training_scores[model]
+    test = testing_scores[model]
+    gap = train - test
+
+    print(
+        f"{model:<20} "
+        f"Train: {train:.2%} | "
+        f"Test: {test:.2%} | "
+        f"Gap: {gap:.2%}"
+    )
+
+
+# In[36]:
 
 
 # ==================================
@@ -813,7 +1107,7 @@ results_df = results_df.sort_values(
 results_df
 
 
-# In[30]:
+# In[37]:
 
 
 # ==================================
@@ -846,7 +1140,7 @@ plt.tight_layout()
 plt.show()
 
 
-# In[31]:
+# In[38]:
 
 
 # ==================================
@@ -871,7 +1165,7 @@ plt.tight_layout()
 plt.show()
 
 
-# In[32]:
+# In[39]:
 
 
 # ==================================
@@ -897,7 +1191,7 @@ def show_confusion_matrix(model_name, model, X_data, y_true):
     plt.show()
 
 
-# In[33]:
+# In[40]:
 
 
 top_models = {
@@ -912,7 +1206,7 @@ for name, model in top_models.items():
     show_confusion_matrix(name, model, X_test, y_test)
 
 
-# In[34]:
+# In[41]:
 
 
 # ==================================
@@ -973,7 +1267,7 @@ def plot_feature_importance(model, model_name, feature_names):
     return importance_df
 
 
-# In[35]:
+# In[42]:
 
 
 rf_importance = plot_feature_importance(
@@ -983,7 +1277,7 @@ rf_importance = plot_feature_importance(
 )
 
 
-# In[36]:
+# In[43]:
 
 
 dt_importance = plot_feature_importance(
@@ -993,7 +1287,7 @@ dt_importance = plot_feature_importance(
 )
 
 
-# In[37]:
+# In[44]:
 
 
 lgb_importance = plot_feature_importance(
@@ -1003,7 +1297,7 @@ lgb_importance = plot_feature_importance(
 )
 
 
-# In[38]:
+# In[45]:
 
 
 xgb_importance = plot_feature_importance(
@@ -1013,7 +1307,7 @@ xgb_importance = plot_feature_importance(
 )
 
 
-# In[39]:
+# In[46]:
 
 
 lr_importance = plot_feature_importance(
@@ -1023,7 +1317,19 @@ lr_importance = plot_feature_importance(
 )
 
 
-# In[40]:
+# In[47]:
+
+
+feature_importance = {
+    "Random Forest": rf_importance,
+    "Decision Tree": dt_importance,
+    "LightGBM": lgb_importance,
+    "XGBoost": xgb_importance,
+    "Logistic Regression": lr_importance
+}
+
+
+# In[48]:
 
 
 rf_importance.to_csv(
@@ -1057,7 +1363,7 @@ lr_importance.to_csv(
 )
 
 
-# In[41]:
+# In[49]:
 
 
 sample = X_test.sample(
@@ -1066,7 +1372,7 @@ sample = X_test.sample(
 )
 
 
-# In[42]:
+# In[50]:
 
 
 # ==================================
@@ -1080,7 +1386,7 @@ rf_shap_values = rf_explainer.shap_values(
 )
 
 
-# In[43]:
+# In[51]:
 
 
 #RF SHAP SUMMARY PLOT 
@@ -1090,7 +1396,7 @@ shap.summary_plot(
 )
 
 
-# In[44]:
+# In[52]:
 
 
 #RF SHAP BAR PLOT
@@ -1101,7 +1407,7 @@ shap.summary_plot(
 )
 
 
-# In[45]:
+# In[53]:
 
 
 # ==================================
@@ -1115,7 +1421,7 @@ dt_shap_values = dt_explainer.shap_values(
 )
 
 
-# In[46]:
+# In[54]:
 
 
 #DT SHAP SUMMARY PLOT 
@@ -1125,7 +1431,7 @@ shap.summary_plot(
 )
 
 
-# In[47]:
+# In[55]:
 
 
 #DT SHAP BAR PLOT
@@ -1136,7 +1442,7 @@ shap.summary_plot(
 )
 
 
-# In[48]:
+# In[56]:
 
 
 # ==================================
@@ -1150,7 +1456,7 @@ lgb_shap_values = lgb_explainer.shap_values(
 )
 
 
-# In[49]:
+# In[57]:
 
 
 #LGB SHAP SUMMARY PLOT 
@@ -1160,7 +1466,7 @@ shap.summary_plot(
 )
 
 
-# In[50]:
+# In[58]:
 
 
 #LGB SHAP BAR PLOT
@@ -1171,7 +1477,7 @@ shap.summary_plot(
 )
 
 
-# In[51]:
+# In[59]:
 
 
 # ==================================
@@ -1185,7 +1491,7 @@ xgb_shap_values = xgb_explainer.shap_values(
 )
 
 
-# In[52]:
+# In[60]:
 
 
 #XGB SHAP SUMMARY PLOT
@@ -1195,7 +1501,7 @@ shap.summary_plot(
 )
 
 
-# In[53]:
+# In[61]:
 
 
 #XGB SHAP BAR PLOT
@@ -1206,7 +1512,7 @@ shap.summary_plot(
 )
 
 
-# In[54]:
+# In[62]:
 
 
 # ==================================
@@ -1235,7 +1541,7 @@ lr_shap_values = lr_explainer(sample_scaled)
 shap.summary_plot(lr_shap_values.values, sample, feature_names=sample.columns)
 
 
-# In[55]:
+# In[63]:
 
 
 #LR SHAP SUMMARY PLOT
@@ -1245,7 +1551,7 @@ shap.summary_plot(
 )
 
 
-# In[56]:
+# In[64]:
 
 
 #LR SHAP BAR PLOT
@@ -1256,7 +1562,7 @@ shap.summary_plot(
 )
 
 
-# In[57]:
+# In[65]:
 
 
 #EXPLAIN RF PREDICTION 
@@ -1288,7 +1594,7 @@ shap.force_plot(
 )
 
 
-# In[58]:
+# In[66]:
 
 
 #EXPLAIN DT PREDICTION 
@@ -1316,7 +1622,7 @@ shap.plots.force(
 )
 
 
-# In[59]:
+# In[67]:
 
 
 #EXPLAIN LGB PREDICTION 
@@ -1344,7 +1650,7 @@ shap.plots.force(
 )
 
 
-# In[60]:
+# In[68]:
 
 
 #EXPLAIN XGB PREDICTION 
@@ -1372,7 +1678,7 @@ shap.plots.force(
 )
 
 
-# In[62]:
+# In[69]:
 
 
 #EXPLAIN LR PREDICTION 
@@ -1433,7 +1739,7 @@ shap.plots.beeswarm(lr_shap_values[:, :, pred_class])
 shap.plots.force(lr_shap_values[row_idx, :, pred_class])
 
 
-# In[63]:
+# In[70]:
 
 
 # from pathlib import Path
@@ -1536,7 +1842,76 @@ shap.plots.force(lr_shap_values[row_idx, :, pred_class])
 # )
 
 
-# In[64]:
+# In[ ]:
+
+
+
+
+
+# In[71]:
+
+
+# ==========================
+# ORIGINAL DATASET INFORMATION
+# ==========================
+
+original_rows = len(raw_df)
+original_columns = len(raw_df.columns)
+
+original_missing_values = int(
+    raw_df.isnull().sum().sum()
+)
+
+original_duplicate_rows = int(
+    raw_df.duplicated().sum()
+)
+
+
+# In[72]:
+
+
+# ==========================
+# PREPARED DATASET INFORMATION
+# ==========================
+
+prepared_rows = len(df)
+prepared_columns = len(df.columns)
+
+prepared_missing_values = int(
+    df.isnull().sum().sum()
+)
+
+prepared_duplicate_rows = int(
+    df.duplicated().sum()
+)
+
+rows_removed = (
+    original_rows - prepared_rows
+)
+
+columns_removed = (
+    original_columns - prepared_columns
+)
+
+duplicates_removed = (
+    original_duplicate_rows -
+    prepared_duplicate_rows
+)
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[73]:
 
 
 # ==================================
@@ -1576,7 +1951,7 @@ dataset_summary = {
 }
 
 
-# In[83]:
+# In[74]:
 
 
 from pathlib import Path
@@ -1623,10 +1998,10 @@ joblib.dump(
     ARTIFACTS_DIR / "drop_columns.pkl"
 )
 
-joblib.dump(
-    list(categorical_to_encode),
-    ARTIFACTS_DIR / "categorical_columns.pkl"
-)
+# joblib.dump(
+#     list(categorical_to_encode),
+#     ARTIFACTS_DIR / "categorical_columns.pkl"
+# )
 
 
 
@@ -1706,21 +2081,43 @@ joblib.dump(
 )
 
 
-# In[66]:
+# In[75]:
 
 
-missing_summary.to_csv(
+joblib.dump(dataset_quality,
+            ARTIFACTS_DIR / "dataset_quality.pkl")
 
-    ARTIFACTS_DIR /
+joblib.dump(df,
+            ARTIFACTS_DIR / "clean_dataset.pkl")
 
-    "missing_values.csv",
+joblib.dump(df.describe(),
+            ARTIFACTS_DIR / "dataset_summary.pkl")
 
-    index=False
+joblib.dump(df.corr(numeric_only=True),
+            ARTIFACTS_DIR / "correlation_matrix.pkl")
 
-)
+joblib.dump(df["Attack_type"].value_counts(),
+            ARTIFACTS_DIR / "class_distribution.pkl")
+
+joblib.dump(feature_importance,
+            ARTIFACTS_DIR / "feature_importance.pkl")
 
 
-# In[67]:
+# In[76]:
+
+
+# missing_summary.to_csv(
+
+#     ARTIFACTS_DIR /
+
+#     "missing_values.csv",
+
+#     index=False
+
+# )
+
+
+# In[77]:
 
 
 corr.to_csv(
@@ -1732,7 +2129,7 @@ corr.to_csv(
 )
 
 
-# In[68]:
+# In[78]:
 
 
 # ==================================
@@ -1774,7 +2171,7 @@ joblib.dump(
 )
 
 
-# In[69]:
+# In[79]:
 
 
 EDA_DIR = ARTIFACTS_DIR / "eda"
@@ -1848,7 +2245,58 @@ joblib.dump(
 )
 
 
-# In[70]:
+# In[80]:
+
+
+dataset_quality_summary = {
+
+    "original_rows":
+        original_rows,
+
+    "original_columns":
+        original_columns,
+
+    "original_missing_values":
+        original_missing_values,
+
+    "original_duplicate_rows":
+        original_duplicate_rows,
+
+    "prepared_rows":
+        prepared_rows,
+
+    "prepared_columns":
+        prepared_columns,
+
+    "prepared_missing_values":
+        prepared_missing_values,
+
+    "prepared_duplicate_rows":
+        prepared_duplicate_rows,
+
+    "rows_removed":
+        rows_removed,
+
+    "columns_removed":
+        columns_removed,
+
+    "duplicates_removed":
+        duplicates_removed,
+
+    # "removed_columns":
+    #     drop_cols
+}
+
+
+
+joblib.dump(
+    dataset_quality_summary,
+    EDA_DIR /
+    "dataset_quality_summary.pkl"
+)
+
+
+# In[81]:
 
 
 training_scores={}
@@ -1884,7 +2332,118 @@ joblib.dump(
 )
 
 
-# In[71]:
+# In[82]:
+
+
+# ==================================
+# MODEL GENERALISATION ANALYSIS
+# ==================================
+
+generalization_results = {}
+
+for name, model in top_models.items():
+
+    train_pred = model.predict(
+        X_train
+    )
+
+    val_pred = model.predict(
+        X_val
+    )
+
+    test_pred = model.predict(
+        X_test
+    )
+
+
+    # Accuracy
+
+    train_accuracy = accuracy_score(
+        y_train,
+        train_pred
+    )
+
+    validation_accuracy = accuracy_score(
+        y_val,
+        val_pred
+    )
+
+    test_accuracy = accuracy_score(
+        y_test,
+        test_pred
+    )
+
+
+    # Weighted F1
+
+    train_f1 = f1_score(
+        y_train,
+        train_pred,
+        average="weighted",
+        zero_division=0
+    )
+
+    validation_f1 = f1_score(
+        y_val,
+        val_pred,
+        average="weighted",
+        zero_division=0
+    )
+
+    test_f1 = f1_score(
+        y_test,
+        test_pred,
+        average="weighted",
+        zero_division=0
+    )
+
+
+    generalization_results[name] = {
+
+        "train_accuracy":
+            train_accuracy,
+
+        "validation_accuracy":
+            validation_accuracy,
+
+        "test_accuracy":
+            test_accuracy,
+
+        "train_validation_accuracy_gap":
+            train_accuracy -
+            validation_accuracy,
+
+        "train_test_accuracy_gap":
+            train_accuracy -
+            test_accuracy,
+
+        "train_weighted_f1":
+            train_f1,
+
+        "validation_weighted_f1":
+            validation_f1,
+
+        "test_weighted_f1":
+            test_f1,
+
+        "train_validation_f1_gap":
+            train_f1 -
+            validation_f1,
+
+        "train_test_f1_gap":
+            train_f1 -
+            test_f1
+    }
+
+
+joblib.dump(
+    generalization_results,
+    EDA_DIR /
+    "generalization_results.pkl"
+)
+
+
+# In[83]:
 
 
 numeric_features=df.select_dtypes(
@@ -1898,6 +2457,41 @@ EDA_DIR/"numeric_features.pkl"
 )
 
 
+# In[84]:
+
+
+# ==================================
+# CLASS DISTRIBUTION
+# ==================================
+
+class_distribution = (
+    df["Attack_type"]
+    .value_counts()
+)
+
+joblib.dump(
+    class_distribution,
+    EDA_DIR /
+    "class_distribution.pkl"
+)
+
+
+# In[85]:
+
+
+correlation_matrix = (
+    df.corr(
+        numeric_only=True
+    )
+)
+
+joblib.dump(
+    correlation_matrix,
+    EDA_DIR /
+    "correlation_matrix.pkl"
+)
+
+
 # In[ ]:
 
 
@@ -1910,7 +2504,13 @@ EDA_DIR/"numeric_features.pkl"
 
 
 
-# In[72]:
+# In[ ]:
+
+
+
+
+
+# In[86]:
 
 
 #===================
@@ -1923,14 +2523,14 @@ plt.title("Feature Importance (XGBoost)")
 plt.show()
 
 
-# In[73]:
+# In[87]:
 
 
 predictedValue = rf.predict(X_test)
 print(predictedValue)
 
 
-# In[74]:
+# In[88]:
 
 
 rf_preds = rf.predict(X_test)
@@ -1955,7 +2555,7 @@ comparison_df.head(20)
 
 
 
-# In[75]:
+# In[89]:
 
 
 import os
@@ -1963,7 +2563,7 @@ import os
 print(os.getcwd())
 
 
-# In[76]:
+# In[90]:
 
 
 import os
@@ -1972,13 +2572,13 @@ print(os.path.exists("models"))
 print(os.path.exists("artifacts"))
 
 
-# In[77]:
+# In[91]:
 
 
 os.listdir("models")
 
 
-# In[78]:
+# In[92]:
 
 
 os.listdir("artifacts")
@@ -1990,24 +2590,13 @@ os.listdir("artifacts")
 
 
 
-# In[79]:
-
-
-import streamlit as st
-
-st.sidebar.write("BASE_DIR:", BASE_DIR)
-st.sidebar.write("ASSETS_DIR:", ASSETS_DIR)
-st.sidebar.write(DATASETS[dataset]["models_dir"])
-st.sidebar.write(DATASETS[dataset]["artifacts_dir"])
-
-
 # In[ ]:
 
 
 
 
 
-# In[ ]:
+# In[93]:
 
 
 from pathlib import Path
@@ -2049,6 +2638,17 @@ for root, dirs, files in os.walk(BASE_DIR):
             print(f"{f:<40} {size} KB")
 
         print()
+
+
+# In[94]:
+
+
+import streamlit as st
+
+st.sidebar.write("BASE_DIR:", BASE_DIR)
+st.sidebar.write("ASSETS_DIR:", ASSETS_DIR)
+st.sidebar.write(DATASETS[dataset]["models_dir"])
+st.sidebar.write(DATASETS[dataset]["artifacts_dir"])
 
 
 # In[ ]:
