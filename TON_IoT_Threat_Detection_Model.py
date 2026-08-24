@@ -78,28 +78,6 @@ print(df["type"].value_counts())
 
 print("Duplicates before cleaning:", df.duplicated().sum())
 
-
-# In[4]:
-
-
-#===================
-#MISSING VALUES ANALYSIS 
-#===================
-# print(df.isnull().sum())
-
-# print(df.isnull().sum().sum())
-
-# print(df["type"].isna().sum()) 
-
-# df = df.dropna(subset=["type"])
-
-
-
-# df.replace([np.inf, -np.inf], np.nan, inplace=True) 
-
-# df.fillna(0, inplace=True)
-
-
 # In[5]:
 
 
@@ -302,59 +280,13 @@ X_val = X_val.copy()
 X_test = X_test.copy()
 
 
-# In[ ]:
-
-
-
-
-
 # In[15]:
-
-
-# ==================================
-# FEATURE (ORDINAL) ENCODING
-# ==================================
-
-# cat_cols = X_train.select_dtypes(
-#     include=["object", "string"]
-# ).columns
 
 encoder = OrdinalEncoder(
     handle_unknown="use_encoded_value",
     unknown_value=-1
 )
 
-
-# encoder = OneHotEncoder(
-#     handle_unknown="ignore",
-#     sparse_output=False
-# )
-
-
-# X_train[cat_cols] = encoder.fit_transform(
-#     X_train[cat_cols]
-# )
-
-# X_val[cat_cols] = encoder.transform(
-#     X_val[cat_cols]
-# )
-
-# X_test[cat_cols] = encoder.transform(
-#     X_test[cat_cols]
-# )
-
-
-
-# Find categorical columns
-# cat_cols = X_train.select_dtypes(
-#     include=["object", "string"]
-# ).columns.tolist()
-
-# Create encoder
-# encoder = OneHotEncoder(
-#     handle_unknown="ignore",
-#     sparse_output=False
-# )
 
 # Fit ONLY on training data
 X_train_encoded = encoder.fit_transform(X_train[cat_cols])
@@ -542,30 +474,6 @@ def evaluate_model(model_name, model, X_data, y_true):
 # ==================================
 
 results = []
-
-
-# In[19]:
-
-
-# clean_df.to_csv(
-#     "datasets/TON_IoT/artifacts/clean_dataset.csv",
-#     index=False
-# )
-
-
-# In[20]:
-
-
-# training_summary = pd.DataFrame({
-#     "Train Accuracy":[train_accuracy],
-#     "Test Accuracy":[test_accuracy],
-#     "Overfitting":[train_accuracy-test_accuracy]
-# })
-
-# training_summary.to_csv(
-#     "datasets/TON_IoT/artifacts/training_summary.csv",
-#     index=False
-# )
 
 
 # In[21]:
@@ -1052,164 +960,9 @@ for name, model in top_models.items():
 
 # In[36]:
 
-
-# ==================================
-# FEATURE IMPORTANCE FUNCTION
-# ==================================
-
-# def plot_feature_importance(model, model_name):
-
-#     importance_df = pd.DataFrame({
-#         "Feature": X_train.columns,
-#         "Importance": model.feature_importances_
-#     })
-
-#     importance_df = importance_df.sort_values(
-#         by="Importance",
-#         ascending=False
-#     )
-
-
-
-
-#     lr_importance = pd.DataFrame({
-#         "Feature": X_train.columns,
-#         "Importance": np.abs(lr_model.named_steps["lr"].coef_[0])
-#     }).sort_values(by="Importance", ascending=False)
-
-#     lr_importance.head(20)
-
-
-
-
-
-
-#     print(f"\nTop 20 Features - {model_name}")
-#     print(importance_df.head(20))
-
-#     plt.figure(figsize=(12,8))
-
-#     plt.barh(
-#         importance_df.head(20)["Feature"],
-#         importance_df.head(20)["Importance"]
-#     )
-
-#     plt.gca().invert_yaxis()
-
-#     plt.title(
-#         f"{model_name} Feature Importance"
-#     )
-
-#     plt.xlabel("Importance Score")
-
-#     plt.tight_layout()
-#     plt.show()
-
-#     return importance_df
-
-
-
-
-
-
-# def plot_feature_importance(model, model_name, feature_names):
-
-#     # CASE 1: Tree-based models
-#     if hasattr(model, "feature_importances_"):
-#         importance = model.feature_importances_
-
-#     # CASE 2: Linear models (Logistic Regression, SVM linear, etc.)
-#     elif hasattr(model, "coef_"):
-#         importance = np.abs(model.coef_).mean(axis=0)
-
-#     # CASE 3: Pipeline (extract final estimator)
-#     elif hasattr(model, "named_steps"):
-#         # try common step names
-#         final_estimator = list(model.named_steps.values())[-1]
-
-#         if hasattr(final_estimator, "feature_importances_"):
-#             importance = final_estimator.feature_importances_
-
-#         elif hasattr(final_estimator, "coef_"):
-#             importance = np.abs(final_estimator.coef_).mean(axis=0)
-
-#         else:
-#             raise ValueError("Model type not supported for feature importance")
-
-#     else:
-#         raise ValueError("Model does not support feature importance")
-
-#     importance_df = pd.DataFrame({
-#         "Feature": feature_names,
-#         "Importance": importance
-#     })
-
-#     importance_df = importance_df.sort_values(by="Importance", ascending=False)
-
-#     print(f"\nTop 20 Features - {model_name}")
-#     print(importance_df.head(20))
-
-#     plt.figure(figsize=(12, 8))
-
-#     plt.barh(
-#         importance_df.head(20)["Feature"],
-#         importance_df.head(20)["Importance"]
-#     )
-
-#     plt.gca().invert_yaxis()
-#     plt.title(f"{model_name} Feature Importance")
-#     plt.xlabel("Importance Score")
-#     plt.tight_layout()
-#     plt.show()
-
-#     return importance_df
-
-
-
-
-# def plot_feature_importance(model, model_name, feature_names):
-
-#     # extract model if it's a pipeline
-#     if hasattr(model, "named_steps"):
-#         model = model.named_steps[list(model.named_steps.keys())[-1]]
-
-#     # check correct attribute
-#     if not hasattr(model, "feature_importances_"):
-#         raise ValueError(f"{model_name} does not support feature_importances_")
-
-#     importance_df = pd.DataFrame({
-#         "Feature": feature_names,
-#         "Importance": model.feature_importances_
-#     })
-
-#     importance_df = importance_df.sort_values(by="Importance", ascending=False)
-
-#     print(f"\nTop 20 Features - {model_name}")
-#     print(importance_df.head(20))
-
-#     plt.figure(figsize=(12, 8))
-#     plt.barh(
-#         importance_df.head(20)["Feature"],
-#         importance_df.head(20)["Importance"]
-#     )
-
-#     plt.gca().invert_yaxis()
-#     plt.title(f"{model_name} Feature Importance")
-#     plt.xlabel("Importance Score")
-#     plt.tight_layout()
-#     plt.show()
-
-#     return importance_df
-
-
-
-
-
 def plot_feature_importance(model, model_name, feature_names):
 
-    # -----------------------------
-    # Extract actual estimator if pipeline
-    # -----------------------------
+
     if hasattr(model, "named_steps"):
         model = model.named_steps[list(model.named_steps.keys())[-1]]
 
@@ -1220,7 +973,7 @@ def plot_feature_importance(model, model_name, feature_names):
         importances = model.feature_importances_
 
     # -----------------------------
-    # Linear models (Logistic Regression, SVM linear)
+    # Logistic Regression
     # -----------------------------
     elif hasattr(model, "coef_"):
         importances = np.abs(model.coef_[0])
@@ -1319,69 +1072,6 @@ feature_importance = {
     "XGBoost": xgb_importance,
     "Logistic Regression": lr_importance
 }
-
-
-# In[ ]:
-
-
-
-
-
-# In[43]:
-
-
-# #===================
-# #FEATURE IMPORTANCE (QUICK INSIGHT) 
-# #===================
-
-# plt.figure(figsize=(10,6))
-# plt.bar(range(len(xgb.feature_importances_)), xgb.feature_importances_)
-# plt.title("Feature Importance (XGBoost)")
-# plt.show()
-
-
-# In[44]:
-
-
-# # ==================================
-# # XGBOOST FEATURE IMPORTANCE
-# # ==================================
-
-# feature_importance = pd.DataFrame({
-#     "Feature": X_train.columns,
-#     "Importance": xgb.feature_importances_
-# })
-
-# feature_importance = feature_importance.sort_values(
-#     by="Importance",
-#     ascending=False
-# )
-
-# feature_importance.head(20)
-
-
-# In[45]:
-
-
-# # TOP 20 IMPORTANT FEATURES
-# # ==================================
-
-# top_features = feature_importance.head(20)
-
-# plt.figure(figsize=(12,8))
-
-# plt.barh(
-#     top_features["Feature"],
-#     top_features["Importance"]
-# )
-
-# plt.gca().invert_yaxis()
-
-# plt.title("Top 20 Important Features - XGBoost")
-# plt.xlabel("Importance Score")
-
-# plt.tight_layout()
-# plt.show()
 
 
 # In[46]:
@@ -1540,56 +1230,6 @@ shap.summary_plot(
 # LOGISTIC REGRESSION SHAP
 # ==================================
 
-# lr_explainer = shap.Explainer(
-#     lr_pipeline,
-#     sample
-# )
-
-# lr_shap_values = lr_explainer(sample)
-
-
-
-
-# shap.initjs()
-
-# scaler = lr_pipeline.named_steps["scaler"]
-# model = lr_pipeline.named_steps["lr"]
-
-# X_sample = scaler.transform(sample)
-
-# lr_explainer = shap.LinearExplainer(model, X_sample)
-# lr_shap_values = lr_explainer.shap_values(X_sample)
-
-# row = 0
-# class_idx = 0  # pick the class you want to explain
-
-# shap.plots.force(
-#     lr_explainer.expected_value[class_idx],
-#     lr_shap_values[class_idx][row]
-# )
-
-
-
-
-# # background used by SHAP
-# background = X_train.sample(n=min(5000, len(X_train)), random_state=42)
-
-# # force SHAP to keep all background rows
-# masker = shap.maskers.Independent(background, max_samples=len(background))
-
-# # logistic regression pipeline instead:
-# model_fn = lr_pipeline.predict_proba
-
-# lr_explainer = shap.Explainer(model_fn, masker)
-
-# sample = X_test.sample(n=min(1000, len(X_test)), random_state=42)
-# lr_shap_values = lr_explainer(sample)
-
-
-
-
-
-
 
 background = X_train.sample(n=min(5000, len(X_train)), random_state=42)
 sample = X_test.sample(n=min(1000, len(X_test)), random_state=42)
@@ -1611,30 +1251,6 @@ lr_shap_values = lr_explainer(sample_scaled)
 
 # summary plot
 shap.summary_plot(lr_shap_values.values, sample, feature_names=sample.columns)
-
-
-
-# # If Tree model (RF / XGB / LGB), use this:
-# explainer = shap.TreeExplainer(lr_pipeline.named_steps["lr"])
-# shap_values = explainer.shap_values(sample)
-
-# # =========================
-# # PLOT ONE INSTANCE
-# # =========================
-# row = 0
-
-# # multiclass-safe handling
-# if isinstance(shap_values, list):
-#     class_idx = 0
-#     shap.plots.force(
-#         explainer.expected_value[class_idx],
-#         shap_values[class_idx][row]
-#     )
-# else:
-#     shap.plots.force(
-#         explainer.expected_value,
-#         shap_values[row]
-#     )
 
 
 # In[60]:
@@ -1668,8 +1284,6 @@ row_idx = 0
 class_idx = 0
 
 print(rf_shap_values[class_idx][row_idx].shape)
-# print(single_row.shape)
-# print(X_sample.shape)
 
 
 # In[63]:
@@ -1679,134 +1293,18 @@ print(rf_shap_values[class_idx][row_idx].shape)
 row_number = 0
 class_idx = 0
 
-# single_prediction = sample.iloc[row_number]
-
-# shap.force_plot(
-#     explainer.expected_value[class_idx],
-#     lr_shap_values[class_idx][row_number],
-#     single_prediction
-# )
-
-
-
-# single_prediction = sample_scaled[row_number]
-
-# # build Explanation object (THIS is the fix)
-# exp = shap.Explanation(
-#     values=lr_shap_values[class_idx][row_number],
-#     base_values=explainer.expected_value[class_idx],
-#     data=single_prediction
-# )
-
-# shap.plots.force(exp)
-
-
-
-# # MUST be 2D row (not 1D)
-# single_prediction = sample_scaled[row_number].reshape(1, -1)
-
-# # SHAP values must also match shape
-# values = lr_shap_values[class_idx][row_number]
-
-# # build proper Explanation
-# exp = shap.Explanation(
-#     values=values,
-#     base_values=explainer.expected_value[class_idx],
-#     data=single_prediction[0]   # flatten back for display
-# )
-
-# shap.plots.force(exp)
-
-
-
-
-# shap.plots.waterfall(
-#     shap.Explanation(
-#         values=lr_shap_values[class_idx][row_number],
-#         base_values=explainer.expected_value[class_idx],
-#         data=sample.iloc[row_number]
-#     )
-# )
-
-
-
-
-# # =========================
-# # TREE EXPLAINER (Random Forest)
-# # =========================
-# rf_explainer = shap.TreeExplainer(rf)
-
-# rf_shap_values = rf_explainer.shap_values(sample)
-
-# # =========================
-# # CLASS SELECTION (for multiclass)
-# # =========================
-# class_idx = 0
-# row_idx = 0
-
-# # =========================
-# # FORCE PLOT
-# # =========================
-# shap.initjs()
-
-# shap.force_plot(
-#     rf_explainer.expected_value[class_idx],
-#     rf_shap_values[class_idx][row_idx],
-#     X_sample.iloc[row_idx],
-#     matplotlib=True
-# )
-
-# # =========================
-# # SUMMARY PLOT (always works)
-# # =========================
-# shap.summary_plot(
-#     rf_shap_values[class_idx],
-#     sample
-# )
-
-
-
-
-# # =========================
-# # RF EXPLAINER
-# # =========================
-# rf_explainer = shap.TreeExplainer(rf)
-
-# rf_shap_values = rf_explainer.shap_values(sample)
-
-# # =========================
-# # SINGLE ROW
-# # =========================
-# row_idx = 0
-# class_idx = 0
-
-# single_row = sample.iloc[row_idx]   # <-- FIX IS HERE
-
-# # =========================
-# # FORCE PLOT
-# # =========================
-# shap.initjs()
-
-# shap.force_plot(
-#     rf_explainer.expected_value[class_idx],
-#     rf_shap_values[class_idx][row_idx],
-#     single_row,
-#     matplotlib=True
-# )
-
-
 
 # explainer
 rf_explainer = shap.TreeExplainer(rf)
 
-# shap values (your shape: samples, features, classes)
+# shap values 
 rf_shap_values = rf_explainer.shap_values(sample)
 
 # pick instance + class
 row_idx = 0
 class_idx = 0
 
-# IMPORTANT: make row 2D
+
 single_row = sample.iloc[[row_idx]].values
 
 # FORCE PLOT 
@@ -1824,18 +1322,6 @@ shap.force_plot(
 
 
 #EXPLAIN DT PREDICTION 
-# row_number = 0
-# class_idx = 0
-
-# single_prediction = sample.iloc[row_number]
-
-# shap.force_plot(
-#     dt_explainer.expected_value[class_idx],
-#     dt_shap_values[class_idx][row_number, :],
-#     single_prediction
-# )
-
-
 
 
 row_idx = 0
@@ -1865,19 +1351,6 @@ shap.plots.force(
 
 
 #EXPLAIN LGB PREDICTION 
-# row_number = 0
-# class_idx = 0
-
-# single_prediction = sample.iloc[row_number]
-
-# shap.force_plot(
-#     lgb_explainer.expected_value[class_idx],
-#     lgb_shap_values[class_idx][row_number, :],
-#     single_prediction
-# )
-
-
-
 
 row_idx = 0
 class_idx = 0
@@ -1906,19 +1379,6 @@ shap.plots.force(
 
 
 #EXPLAIN XGB PREDICTION 
-# row_number = 0
-# class_idx = 0
-
-# single_prediction = sample.iloc[row_number]
-
-# shap.force_plot(
-#     xgb_explainer.expected_value[class_idx],
-#     xgb_shap_values[class_idx][row_number, :],
-#     single_prediction
-# )
-
-
-
 
 row_idx = 0
 class_idx = 0
@@ -1954,189 +1414,6 @@ print(np.array(lr_shap_values).shape)
 
 
 #EXPLAIN LR PREDICTION 
-# row_number = 0
-
-# single_prediction = sample.iloc[[row_number]]
-
-# shap.force_plot(
-#     lr_explainer.expected_value,
-#     lr_shap_values[row_number],
-#     single_prediction
-# )
-
-
-
-
-
-# # =========================
-# # DATA (use numpy, not pandas for SHAP)
-# # =========================
-# X_bg = sample.values  # background
-# X_explain = sample.values[:100]  # small explain set
-
-# # =========================
-# # EXPLAINER (WORKS FOR LR PIPELINE)
-# # =========================
-# lr_model = lr_pipeline.named_steps["lr"]
-
-# lr_explainer = shap.LinearExplainer(
-#     lr_model,
-#     masker=X_bg
-# )
-
-# # SHAP values
-# shap_values = explainer.shap_values(X_explain)
-
-# # =========================
-# # PICK ONE SAMPLE
-# # =========================
-# i = 0
-
-# # =========================
-# # FORCE PLOT (binary or multi-class safe)
-# # =========================
-# shap.initjs()
-
-# shap.plots.force(
-#     lr_explainer.expected_value,
-#     shap_values[i],
-#     X_explain[i]
-# )
-
-
-
-
-
-# single_row = sample.iloc[[row_idx]].values
-
-# lr_explainer = shap.Explainer(
-#     lr_pipeline.predict,
-#     single_row
-# )
-
-# lr_shap_values = lr_explainer(single_row)
-
-# # Explain a single prediction
-# row_idx = 0
-
-# shap.plots.force(
-#     lr_shap_values[row_idx]
-# )
-
-
-
-
-
-# # =========================
-# # 1. Pick model + data
-# # =========================
-
-# model = lr_pipeline
-
-# # ensure dataframe format (fixes feature-name warning)
-# X_explain = sample.reset_index(drop=True)
-
-# # =========================
-# # 2. Build explainer (MODERN WAY)
-# # =========================
-
-# lr_explainer = shap.Explainer(
-#     model,
-#     X_explain,
-#     algorithm="permutation"   # SAFE for ANY model (LR, RF, DT, XGB, LGB)
-# )
-
-# # =========================
-# # 3. Compute SHAP values
-# # =========================
-
-# lr_shap_values = lr_explainer(X_explain)
-
-# print(type(lr_shap_values))
-# print(lr_shap_values.values.shape)   # (samples, features, classes) or (samples, features)
-
-# # =========================
-# # 4. Pick one sample + class
-# # =========================
-
-# i = 0
-# class_idx = 0  # change if multi-class
-
-# # =========================
-# # 5. FORCE PLOT (correct SHAP v0.20+ style)
-# # =========================
-
-# shap.plots.force(
-#     lr_shap_values[i, :, class_idx] if len(lr_shap_values.values.shape) == 3 else lr_shap_values[i, :]
-# )
-
-
-
-
-
-# # =========================
-# # DATA (must be DataFrame)
-# # =========================
-# X_explain = sample.copy().reset_index(drop=True)
-
-# # =========================
-# # SAFE PREDICTION FUNCTION
-# # (THIS FIXES YOUR ERROR)
-# # =========================
-# def model_predict(data):
-#     return lr_pipeline.predict_proba(data)
-
-# # =========================
-# # SHAP EXPLAINER (WORKING FIX)
-# # =========================
-# explainer = shap.Explainer(
-#     model_predict,
-#     X_explain,
-#     algorithm="permutation"
-# )
-
-# # =========================
-# # COMPUTE SHAP VALUES
-# # =========================
-# shap_values = explainer(X_explain)
-
-# # =========================
-# # PICK ONE SAMPLE + CLASS
-# # =========================
-# i = 0
-# class_idx = 0
-
-# # =========================
-# # FORCE PLOT (CORRECT FORMAT)
-# # =========================
-# shap.plots.force(
-#     shap_values[i, :, class_idx]
-# )
-
-
-
-
-# # =========================
-# # pick sample + class
-# # =========================
-# i = 0
-# class_idx = 0
-
-# # =========================
-# # SAFE slicing
-# # =========================
-# single_explanation = shap_values[i, :, class_idx]
-
-# # =========================
-# # FORCE PLOT (modern API)
-# # =========================
-# shap.plots.force(single_explanation)
-
-
-
-
-
-
 
 
 background = X_train.sample(n=min(5000, len(X_train)), random_state=42)
@@ -2178,74 +1455,6 @@ shap.plots.beeswarm(lr_shap_values[:, :, pred_class])
 
 
 shap.plots.force(lr_shap_values[row_idx, :, pred_class])
-
-
-# In[69]:
-
-
-# from pathlib import Path
-
-# # ARTIFACTS_DIR = Path("artifacts/ton_iot")
-# # MODEL_DIR = Path("models/ton_iot")
-# # ARTIFACTS_DIR.mkdir(exist_ok=True)
-# # MODEL_DIR.mkdir(exist_ok=True)
-
-
-# PROJECT_DIR = Path.cwd().resolve()
-# if PROJECT_DIR.name.lower() == "notebooks":
-#     PROJECT_DIR = PROJECT_DIR.parent
-
-# MODEL_DIR = PROJECT_DIR / "datasets" / "TON_IoT" / "models" 
-# ARTIFACTS_DIR = PROJECT_DIR / "datasets" / "TON_IoT" / "artifacts" 
-
-# MODEL_DIR.mkdir(parents=True, exist_ok=True)
-# ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
-
-
-# # Save trained models
-# joblib.dump(rf, MODEL_DIR / "random_forest.pkl")
-# joblib.dump(dt, MODEL_DIR / "decision_tree.pkl")
-# joblib.dump(lgb, MODEL_DIR / "lightgbm.pkl")
-# joblib.dump(xgb, MODEL_DIR / "xgboost.pkl")
-# joblib.dump(lr_pipeline, MODEL_DIR / "logistic_regression.pkl")
-
-# # Save encoders and metadata
-# joblib.dump(encoder, ARTIFACTS_DIR / "feature_encoder.pkl")
-# joblib.dump(target_encoder, ARTIFACTS_DIR / "target_encoder.pkl")
-# joblib.dump(list(X_train.columns), ARTIFACTS_DIR / "feature_names.pkl")
-# joblib.dump(list(cat_cols), ARTIFACTS_DIR / "categorical_columns.pkl")
-# joblib.dump(drop_cols, ARTIFACTS_DIR / "drop_columns.pkl")
-
-# # Save results table
-# results_df.to_csv(ARTIFACTS_DIR / "results.csv", index=False)
-
-# # Save evaluation sample for confusion matrices and SHAP
-# # eval_sample = X_test.sample(n=min(5000, len(X_test)), random_state=42)
-# # eval_labels = y_test.loc[eval_sample.index].to_numpy()
-
-
-# sample_idx = np.random.RandomState(42).choice(
-#     len(X_test),
-#     size=min(5000, len(X_test)),
-#     replace=False
-# )
-
-# # eval_sample = X_test.iloc[sample_idx]
-# # eval_labels = y_test[sample_idx]
-
-# eval_sample = X_test.sample(n=min(5000, len(X_test)), random_state=42)
-# eval_labels = y_test.loc[eval_sample.index].to_numpy()
-
-
-# eval_sample.to_csv(ARTIFACTS_DIR / "eval_sample.csv", index=False)
-# joblib.load(ARTIFACTS_DIR / "eval_sample.pkl")
-# joblib.dump(eval_labels, ARTIFACTS_DIR / "eval_labels.pkl")
-
-
-# In[ ]:
-
-
-
 
 
 # In[70]:
@@ -2297,12 +1506,6 @@ duplicates_removed = (
     original_duplicate_rows -
     prepared_duplicate_rows
 )
-
-
-# In[ ]:
-
-
-
 
 
 # In[72]:
@@ -2450,12 +1653,6 @@ joblib.dump(df["type"].value_counts(),
 
 joblib.dump(feature_importance,
             ARTIFACTS_DIR / "feature_importance.pkl")
-
-
-# In[ ]:
-
-
-
 
 
 # In[74]:
@@ -2840,157 +2037,3 @@ joblib.dump(
     EDA_DIR /
     "correlation_matrix.pkl"
 )
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[84]:
-
-
-predictedValue = rf.predict(X_test)
-print(predictedValue)
-
-
-# In[85]:
-
-
-rf_preds = rf.predict(X_test)
-
-comparison_df = pd.DataFrame({
-    "Actual": target_encoder.inverse_transform(y_test),
-    "Predicted": target_encoder.inverse_transform(rf_preds)
-})
-
-comparison_df.head(20)
-
-
-# In[ ]:
-
-
-
-
-
-# In[86]:
-
-
-from pathlib import Path
-import os
-
-# Change this to the correct dataset folder if needed
-BASE_DIR = Path.cwd()
-
-print("=" * 80)
-print("CURRENT WORKING DIRECTORY")
-print("=" * 80)
-print(BASE_DIR)
-
-print()
-
-# Search for every folder called artifacts or models
-for root, dirs, files in os.walk(BASE_DIR):
-
-    folder_name = Path(root).name.lower()
-
-    if folder_name in ["artifacts", "models"]:
-
-        print("=" * 80)
-        print(f"FOLDER : {root}")
-        print("=" * 80)
-
-        if len(files) == 0:
-            print("No files found.")
-
-        for f in sorted(files):
-
-            path = Path(root) / f
-
-            try:
-                size = round(path.stat().st_size / 1024, 2)
-            except:
-                size = "Unknown"
-
-            print(f"{f:<40} {size} KB")
-
-        print()
-
-
-# In[87]:
-
-
-import pandas as pd
-from pathlib import Path
-
-BASE_DIR = Path.cwd()
-
-results_files = list(BASE_DIR.rglob("results.csv"))
-
-print("=" * 80)
-print("RESULTS FILES FOUND")
-print("=" * 80)
-
-for file in results_files:
-
-    print("\n")
-    print(file)
-
-    df = pd.read_csv(file)
-
-    print("\nColumns:")
-
-    for c in df.columns:
-        print("-", c)
-
-    print("\nFirst five rows:")
-
-    display(df.head())
-
-
-# In[88]:
-
-
-from pathlib import Path
-
-BASE_DIR = Path.cwd()
-
-print("=" * 80)
-print("FEATURE FILES")
-print("=" * 80)
-
-keywords = [
-
-    "feature",
-
-    "importance",
-
-    "selected",
-
-    "ranking"
-
-]
-
-for file in BASE_DIR.rglob("*"):
-
-    if file.is_file():
-
-        name = file.name.lower()
-
-        if any(k in name for k in keywords):
-
-            print(file)
-

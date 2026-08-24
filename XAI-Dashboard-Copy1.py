@@ -363,8 +363,6 @@ def load_artifacts(dataset_key: str):
     results_path = artifacts_dir / "results.csv"
     confusion_matrix_path = artifacts_dir / "confusion_matrices.pkl"
     classification_reports_path = artifacts_dir / "classification_reports.pkl"
-    # eval_sample_path = artifacts_dir / "eval_sample.csv"
-    # eval sample may be csv OR pkl
     eval_sample_csv = artifacts_dir / "eval_sample.csv"
     eval_sample_pkl = artifacts_dir / "eval_sample.pkl"
     eval_labels_path = artifacts_dir / "eval_labels.pkl"
@@ -529,7 +527,7 @@ def get_model_importance(model_name: str, model, feature_names):
     if model_name == "Logistic Regression":
         coef = model.named_steps["lr"].coef_
         if coef.ndim == 2:
-            # multiclass: use mean absolute coefficient across classes
+            # multiclass: mean absolute coefficient across classes
             importance = np.mean(np.abs(coef), axis=0)
         else:
             importance = np.abs(coef)
@@ -657,330 +655,6 @@ def plot_lr_reasoning(model, X_row, feature_names, target_encoder):
     return pred_label
 
 
-# def plot_lr_waterfall(model, X_row, feature_names, target_encoder):
-#     lr = model.named_steps["lr"]
-#     # Prediction
-#     pred = model.predict(X_row)[0]
-#     pred_label = target_encoder.inverse_transform([pred])[0]
-
-#     # -----------------------------
-#     # Contribution table
-#     # -----------------------------
-#     coef = lr.coef_
-#     class_idx = int(pred)
-#     row_coef = coef[class_idx]
-
-#     contribution_df = pd.DataFrame({
-#         "Feature": feature_names,
-#         "Coefficient": row_coef,
-#         "Feature Value": x_row.iloc[0].values,
-#         "Contribution": row_coef * x_row.iloc[0].values
-#     })
-
-#     contribution_df["Absolute Impact"] = (
-#         contribution_df["Contribution"].abs()
-#     )
-
-#     contribution_df = (
-#         contribution_df
-#         .sort_values(
-#             "Absolute Impact",
-#             ascending=False
-#         )
-#     )
-
-#     st.subheader("Feature contribution table")
-
-#     st.dataframe(contribution_df.head(20), use_container_width=True)
-
-#     # SHAP Linear Explainer
-#     explainer = shap.LinearExplainer(lr, X_row, feature_perturbation="interventional")
-
-#     shap_values = explainer.shap_values(X_row)
-
-#     # Handle multiclass output
-#     if len(shap_values.shape) == 3:
-#         values = shap_values.values[0, :, class_idx]
-#         base_value = shap_values.base_values[0, class_idx]
-#     else:
-#         values = shap_values.values[0]
-#         base_value = shap_values.base_values[0]
-
-
-#     explanation = shap.Explanation(
-#         values=values,
-#         base_values=base_value,
-#         data=X_row.iloc[0].values,
-#         feature_names=feature_names
-#     )
-
-
-#     fig = plt.figure(figsize=(12,7))
-
-#     shap.plots.waterfall(
-#         explanation,
-#         max_display=15,
-#         show=False
-#     )
-
-#     plt.tight_layout()
-#     st.pyplot(fig)
-#     plt.close(fig)
-
-#     return pred_label
-
-
-
-# def plot_lr_waterfall(model, X_row, feature_names, target_encoder):
-
-#     lr = model.named_steps["lr"]
-
-#     pred = model.predict(X_row)[0]
-
-#     pred_label = target_encoder.inverse_transform(
-#         [pred]
-#     )[0]
-
-
-#     background = X_row.copy()
-
-
-#     explainer = shap.LinearExplainer(
-#         lr,
-#         background
-#     )
-
-
-#     shap_values = explainer.shap_values(
-#         X_row
-#     )
-
-
-#     lr = model.named_steps["lr"]
-    
-#     background_transformed = model[:-1].transform(background)
-    
-#     explainer = shap.LinearExplainer(
-#         lr,
-#         background_transformed
-#     )
-
-
-#     explainer = shap.LinearExplainer(
-#         model,
-#         background_data
-#     )
-    
-#     shap_values = explainer(x_row)
-
-
-#     # multiclass handling
-#     if isinstance(shap_values, list):
-#         values = shap_values[pred][0]
-#         base_value = explainer.expected_value[pred]
-
-#     else:
-#         shap_values = np.array(shap_values)
-
-
-#         if shap_values.ndim == 3:
-#             values = shap_values[0, :, pred]
-#             base_value = explainer.expected_value[pred]
-
-#         else:
-#             values = shap_values[0]
-#             base_value = explainer.expected_value
-
-
-#     feature_names = np.asarray(feature_names).ravel()
-#     values = np.asarray(values)
-    
-#     if values.ndim == 2:
-#         values = values[0]
-    
-#     if values.ndim > 1:
-#         values = values.ravel()
-
-
-
-#     # Keep your table
-
-#     reason_df = pd.DataFrame({
-#         "Feature": feature_names,
-#         "SHAP Value": values,
-#         "Impact": np.abs(values)
-#     })
-
-
-#     reason_df = (
-#         reason_df
-#         .sort_values(
-#             "Impact",
-#             ascending=False
-#         )
-#     )
-
-
-#     st.subheader(
-#         "Feature contribution table"
-#     )
-
-#     st.dataframe(
-#         reason_df.head(20),
-#         use_container_width=True
-#     )
-
-
-#     # waterfall
-
-#     explanation = shap.Explanation(
-#         values=values,
-#         base_values=float(
-#             np.array(base_value).reshape(-1)[0]
-#         ),
-#         data=X_row.iloc[0].values,
-#         feature_names=X_row.columns
-#     )
-
-
-#     st.subheader(
-#         "SHAP Local Explanation"
-#     )
-
-
-#     fig = plt.figure(
-#         figsize=(12,7)
-#     )
-
-#     shap.plots.waterfall(
-#         explanation,
-#         max_display=15,
-#         show=False
-#     )
-
-#     plt.tight_layout()
-#     st.pyplot(fig)
-#     plt.close(fig)
-
-#     return pred_label
-
-
-
-# def plot_lr_waterfall(model, X_row, feature_names, target_encoder):
-    
-#     if len(X_row) > 1:
-#         X_row = X_row.iloc[[0]]
-
-#     # Get fitted scaler and LR model
-#     scaler = model.named_steps["scaler"]
-#     lr = model.named_steps["lr"]
-
-#     # Scale the selected sample
-#     X_scaled = scaler.transform(X_row)
-
-#     # Prediction
-#     pred = model.predict(X_row)[0]
-#     pred_label = target_encoder.inverse_transform([pred])[0]
-
-#     # Use the scaled sample as background
-#     background = X_scaled
-
-#     # st.write("X_row shape:", X_row.shape)
-#     # st.write("X_scaled shape:", X_scaled.shape)
-
-#     # Build SHAP explainer
-#     explainer = shap.LinearExplainer(
-#         lr,
-#         background
-#     )
-
-#     # Explain only the selected instance
-#     shap_values = explainer(X_scaled[0:1])
-
-#     # st.write("SHAP values shape:", shap_values.values.shape)
-
-#     # Predicted class
-#     pred_class = int(pred)
-    
-#     # SHAP output shape:
-#     # (samples, features, classes)
-#     values = np.asarray(shap_values.values)[0, :, pred_class]
-    
-#     # Base value for predicted class
-#     # base_value = np.asarray(shap_values.base_values)[0, pred_class]
-    
-    
-#     # # Extract values
-#     # values = np.asarray(shap_values.values)
-    
-#     # # Handle batch dimension
-#     # if values.ndim == 2:
-#     #     values = values[0]
-    
-#     # values = values.reshape(-1)
-
-#     # Base value
-#     base_value = float(np.asarray(shap_values.base_values).reshape(-1)[0])
-
-#     # values = np.array(values).flatten()
-    
-#     if len(feature_names) != len(values):
-#         st.warning(
-#             f"Feature mismatch: {len(feature_names)} features but {len(values)} SHAP values"
-#         )
-    
-#         if len(feature_names) != len(values):
-#             raise ValueError(
-#                 f"SHAP mismatch: {len(feature_names)} feature names but {len(values)} SHAP values"
-#             )
-    
-#     reason_df = pd.DataFrame({
-#         "Feature": feature_names,
-#         "SHAP Value": values,
-#         "Impact": np.abs(values)
-#     })
-
-
-#     reason_df = reason_df.sort_values(
-#         "Impact",
-#         ascending=False
-#     )
-
-#     st.subheader("Feature contribution table")
-#     st.dataframe(
-#         reason_df.head(20),
-#         use_container_width=True,
-#         hide_index=True
-#     )
-
-#     # Create SHAP Explanation
-#     explanation = shap.Explanation(
-#         values=values,
-#         base_values=base_value,
-#         data=X_scaled[0],
-#         feature_names=feature_names
-#     )
-
-#     st.subheader("SHAP Local Explanation")
-
-#     fig = plt.figure(figsize=(12,7))
-
-#     shap.plots.waterfall(
-#         explanation,
-#         max_display=15,
-#         show=False
-#     )
-
-#     plt.tight_layout()
-
-#     st.pyplot(fig)
-
-#     plt.close(fig)
-
-#     return pred_label
-
-    
-
 
 def display_confusion_matrix(model_name, y_true, y_pred, class_names):
     fig, ax = plt.subplots(figsize=(12, 10))
@@ -1028,8 +702,6 @@ def interpret_generalization(
         validation_accuracy
     )
 
-    # These are indicative dashboard flags,
-    # not definitive statistical diagnoses.
 
     if gap >= 0.05:
 
@@ -1105,7 +777,6 @@ confusion_matrices = artifacts["confusion_matrices"]
 classification_reports = artifacts["classification_reports"]
 eval_sample = artifacts["eval_sample"].copy()
 eval_labels = np.array(artifacts["eval_labels"])
-# eda = artifacts.get("eda", {})
 eda = artifacts["eda"]
 
 results_df = results_df.sort_values(by="Weighted_F1", ascending=False).reset_index(drop=True)
@@ -1172,12 +843,6 @@ if page == "Overview":
         c3.metric("Accuracy", f'{top_row["Accuracy"]:.2%}')
         c4.metric("ROC AUC", f'{top_row["ROC_AUC"]:.2%}')
     
-        # st.subheader("Dataset and model summary")
-        # summary_cols = st.columns(3)
-        # summary_cols[0].metric("Features", len(feature_names))
-        # summary_cols[1].metric("Attack classes", len(target_encoder.classes_))
-        # summary_cols[2].metric("Evaluation rows", len(eval_sample))
-
 
         st.subheader("Top model ranking")
         st.write("""
@@ -1242,138 +907,6 @@ if page == "Overview":
 # ------------------------------
 # PAGE: DATASET ANALYSIS
 # ------------------------------
-# elif page == "Dataset Analysis":
-
-#     dataset_analysis_tabs = st.tabs([
-#         "Exploratory Data Analysis (EDA)", "Performance Summary", "Missing Value Analysis"])
-
-#     with dataset_analysis_tabs[0]:
-#         st.subheader(
-#             "Exploratory Data Analysis (EDA)"
-#             )
-
-#         st.write("""
-#             This page presents exploratory data analysis (EDA) to help understand the characteristics of the dataset. 
-#             It includes the number of records, features and attack classes. It also reports missing values, 
-#             duplicate records and possible overfitting/underfitting, allowing users to quickly assess 
-#             the quality of the data. 
-
-#             The raw datasets were already processed and filtered for the use of evaluating traditional machine learning-based intrusion detection systems. 
-#             Because of that, both datasets did not contain any missing values. 
-#             However, this page helps users understand what is contained in the selected dataset
-#             before looking at the machine-learning results.
-            
-#             It answers simple questions such as:
-            
-#             • What is in the dataset?
-            
-#             • What is the quality of the data? Does it contain missing or duplicate records?
-            
-#             • Which features are important?
-            
-#             • Does the data show any potential problems?
-#             """)
-
-#         eda = artifacts["eda"]
-#         if eda["dataset_info"]:
-#             info = eda["dataset_info"]
-
-#             with dataset_analysis_tabs[1]:
-#                 with st.container():
-#                     st.subheader("Dataset Information")
-
-#                     st.write("""
-#                     This page answers "What is in this dataset?". These numbers give a quick overview of the size and structure of the dataset after cleaning.
-                    
-#                     The rows represents each observation in the dataset.
-#                     Features are the individual characteristics of the network activity that the
-#                     machine-learning models use to identify different types of behaviour. They are listed under the "Missing Values" tab.
-#                     Duplicate rows are identical observations. They are checked because repeated observations can affect how the model learns from the data.
-#                     Attack classes are the categories of cyber attacks the model is being trained to recognise.
-                
-#                     These values help the user understand the size and complexity of the problem
-#                     before machine learning is applied.
-#                     """)
-                    
-#                     c1,c2,c3,c4,c5 = st.columns(5)
-            
-#                     c1.metric(
-#                         "Dataset Rows",
-#                         info["rows"]
-#                     )
-            
-#                     c2.metric(
-#                         "Features",
-#                         info["columns"]
-#                     )
-            
-#                     c3.metric(
-#                         "Duplicate Rows",
-#                         info["duplicates"]
-#                     )
-
-#                     c4.metric(
-#                         "Attack classes", 
-#                         len(target_encoder.classes_)
-#                     )
-                    
-#                     c5.metric(
-#                         "Evaluation rows", 
-#                         len(eval_sample)
-#                     )
-                        
-#                     st.write(
-#                     "Attack Classes:"
-#                     )
-            
-#                     st.write(
-#                         info["classes"]
-#                     )
-            
-#         with dataset_analysis_tabs[2]:
-#             st.subheader("Missing Value Analysis")
-    
-#             st.write("""
-#                     This page answers "What is the quality of the data?". Before using the data for 
-#                     machine learning, it is important to check for common data-quality issues.
-                    
-#                     Missing values represent incomplete information within the dataset.
-#                     Datasets containing many missing values can reduce prediction performance and may
-#                     require cleaning or imputation before training machine learning models. In this case, 
-#                     the downloaded raw dataset were already cleaned and prepared for machine learning projects. 
-#                     """)
-        
-#             missing = eda["missing_values"]
-        
-#             missing_df = (
-#                 missing
-#                 .reset_index()
-#             )
-        
-#             missing_df.columns=[
-#                 "Feature",
-#                 "Missing Values"
-#             ]
-
-#             st.dataframe(
-#                 missing_df,
-#                 hide_index=True,
-#                 use_container_width=True
-#             )
-
-#             st.subheader("Overfitting/Underfitting")
-
-#             st.write("""
-#                 Training performance shows how well the model performs on data it learned from.
-#                 Testing performance shows how well it performs on data it did not see during training.
-                
-#                 A large difference between training and testing performance may indicate that
-#                 the model has learned the training data too closely. A small difference suggests
-#                 more consistent performance on unseen data. In this case, there is very little overfitting gap suggesting consistency. 
-#                 """)
-
-
-
 
 elif page == "Dataset Analysis":
 
@@ -1393,23 +926,16 @@ elif page == "Dataset Analysis":
             "Exploratory Data Analysis (EDA)"
             )
 
-        # st.write(
-        #     dataset_cfg["eda_intro"]
-        #     )
-
         st.write("""
             This page presents exploratory data analysis (EDA) to help understand the characteristics of the dataset. 
             It includes the number of records, features and attack classes. It also reports missing values, 
             duplicate records and possible overfitting/underfitting, allowing users to quickly assess 
             the quality of the data. It answers simple questions such as:
             
-            • What is in the dataset?
-            
-            • What is the quality of the data? 
-            
-            • Which features are important?
-            
-            • Does the data show any potential problems?
+            - What is in the dataset?
+            - What is the quality of the data? 
+            - Which features are important?
+            - Does the data show any potential problems?
             """)
 
         eda = artifacts["eda"]
@@ -1715,153 +1241,6 @@ elif page == "Dataset Analysis":
                     "Class distribution information is not available."
                 )
 
-
-        # with dataset_analysis_tabs[4]:
-        #     with st.container():
-
-        #         st.subheader(
-        #             "4. What do the feature values look like?"
-        #         )
-            
-        #         st.caption(
-        #             "Features are the pieces of information the models use to "
-        #             "distinguish different types of network behaviour."
-        #         )
-            
-            
-        #         feature_statistics = eda.get(
-        #             "feature_statistics"
-        #         )
-            
-            
-        #         if isinstance(
-        #             feature_statistics,
-        #             pd.DataFrame
-        #         ):
-            
-        #             st.dataframe(
-        #                 styled_table(
-        #                     feature_statistics
-        #                 ),
-        #                 use_container_width=True
-        #             )
-            
-        #         st.subheader("ℹ️ What do these statistics mean?")
-            
-        #         st.write(
-        #             """
-        #             Mean: the average value.
-            
-        #             Median: the middle value when the observations are ordered.
-            
-        #             Standard deviation: how much the values vary around the average.
-            
-        #             Minimum and maximum: the smallest and largest recorded values.
-            
-        #             The 25% and 75% values help show where most observations fall.
-        #             """
-        #             )
-            
-
-
-
-        # with dataset_analysis_tabs[4]:
-        #     with st.container():
-
-        #         st.subheader(
-        #             "5. Are there unusually high or low values?"
-        #         )
-            
-        #         st.caption(
-        #             "Select a numerical feature to investigate its distribution "
-        #             "and potential outliers."
-        #         )
-            
-            
-        #         if isinstance(
-        #             numeric_features,
-        #             pd.DataFrame
-        #         ) and not numeric_features.empty:
-            
-        #             numeric_columns = list(
-        #                 numeric_features.columns
-        #             )
-            
-        #             selected_feature = st.selectbox(
-        #                 "Select a feature",
-        #                 numeric_columns,
-        #                 key=f"eda_feature_{dataset}"
-        #             )
-            
-            
-        #             fig, ax = plt.subplots(
-        #                 figsize=(10, 5)
-        #             )
-            
-        #             ax.boxplot(
-        #                 numeric_features[
-        #                     selected_feature
-        #                 ].dropna()
-        #             )
-            
-        #             ax.set_ylabel(
-        #                 selected_feature
-        #             )
-            
-        #             ax.set_title(
-        #                 f"{selected_feature} - Value Distribution"
-        #             )
-            
-        #             plt.tight_layout()
-            
-        #             st.pyplot(fig)
-            
-        #             plt.close(fig)
-            
-            
-        #             outlier_summary = eda.get(
-        #                 "outlier_summary",
-        #                 {}
-        #             )
-            
-        #             selected_outliers = (
-        #                 outlier_summary
-        #                 .get(
-        #                     selected_feature,
-        #                     {}
-        #                 )
-        #             )
-            
-            
-        #             if selected_outliers:
-            
-        #                 st.metric(
-        #                     "Potential Outliers",
-        #                     f'{selected_outliers.get("Outlier_Count", 0):,}'
-        #                 )
-            
-            
-        #             st.subheader("ℹ️ How should I interpret a box plot?")
-            
-        #             st.write(
-        #                 """
-        #                 The central box represents the middle portion of the data.
-        
-        #                 The line inside the box represents the median.
-            
-        #                 The whiskers show the broader typical range.
-            
-        #                 Points or observations outside this range may be unusually
-        #                 high or low compared with most observations.
-            
-        #                 Unusual values are not automatically errors or attacks.
-        #                 They may represent legitimate but uncommon network behaviour.
-        #                 """
-        #                 )
-            
-
-
-
         with dataset_analysis_tabs[4]:
             with st.container():
                 st.subheader(
@@ -1952,45 +1331,6 @@ elif page == "Dataset Analysis":
                         Stronger colours indicate a stronger relationship..
                         """
                         )
-
-
-
-
-
-        # with dataset_analysis_tabs[5]:
-        #     with st.container():
-        #         st.subheader(
-        #             "7. Which information is used by the models?"
-        #         )
-            
-        #         st.caption(
-        #             dataset_cfg["feature_context"]
-        #         )
-            
-            
-        #         selected_features = eda.get(
-        #             "selected_features",
-        #             []
-        #         )
-            
-            
-        #         st.write(
-        #             f"**Final modelling features: {len(selected_features)}**"
-        #         )
-            
-            
-        #         st.subheader("View selected features")
-            
-        #         feature_df = pd.DataFrame({
-        #             "Feature": selected_features
-        #         })
-            
-        #         st.dataframe(
-        #             feature_df,
-        #             use_container_width=True,
-        #             hide_index=True
-        #         )
-
 
         with dataset_analysis_tabs[5]:
             with st.container():
@@ -2116,869 +1456,6 @@ elif page == "Dataset Analysis":
                     """
                 )
                 
-
-                
-
-        
-        # with dataset_analysis_tabs[10]:
-        #     with st.container():
-        #         st.subheader("Dataset Information")
-
-        #         st.write("""
-        #             This page answers "What is in this dataset?". These numbers give a quick overview of the size and structure of the dataset after cleaning.
-                    
-        #             The rows represents each observation in the dataset.
-        #             Features are the individual characteristics of the network activity that the
-        #             machine-learning models use to identify different types of behaviour. They are listed under the "Missing Values" tab.
-        #             Duplicate rows are identical observations. They are checked because repeated observations can affect how the model learns from the data.
-        #             Attack classes are the categories of cyber attacks the model is being trained to recognise.
-                
-        #             These values help the user understand the size and complexity of the problem
-        #             before machine learning is applied.
-        #             """)
-                    
-        #         c1,c2,c3,c4,c5 = st.columns(5)
-            
-        #         c1.metric(
-        #             "Dataset Rows",
-        #             info["rows"]
-        #         )
-        
-        #         c2.metric(
-        #             "Features",
-        #             info["columns"]
-        #         )
-        
-        #         c3.metric(
-        #             "Duplicate Rows",
-        #             info["duplicates"]
-        #         )
-
-        #         c4.metric(
-        #             "Attack classes", 
-        #             len(target_encoder.classes_)
-        #         )
-                    
-        #         c5.metric(
-        #             "Evaluation rows", 
-        #             len(eval_sample)
-        #         )
-                        
-        #         st.write(
-        #             "Attack Classes:"
-        #         )
-            
-        #         st.write(
-        #             info["classes"]
-        #         )
-            
-        # with dataset_analysis_tabs[11]:
-        #     st.subheader("Missing Value Analysis")
-    
-        #     st.write("""
-        #             This page answers "What is the quality of the data?". Before using the data for 
-        #             machine learning, it is important to check for common data-quality issues.
-                    
-        #             Missing values represent incomplete information within the dataset.
-        #             Datasets containing many missing values can reduce prediction performance and may
-        #             require cleaning or imputation before training machine learning models. In this case, 
-        #             the downloaded raw dataset were already cleaned and prepared for machine learning projects. 
-        #             """)
-        
-        #     missing = eda["missing_values"]
-        
-        #     missing_df = (
-        #         missing
-        #         .reset_index()
-        #     )
-        
-        #     missing_df.columns=[
-        #         "Feature",
-        #         "Missing Values"
-        #     ]
-
-        #     st.dataframe(
-        #         missing_df,
-        #         hide_index=True,
-        #         use_container_width=True
-        #     )
-
-        #     st.subheader("Overfitting/Underfitting")
-
-        #     st.write("""
-        #         Training performance shows how well the model performs on data it learned from.
-        #         Testing performance shows how well it performs on data it did not see during training.
-                
-        #         A large difference between training and testing performance may indicate that
-        #         the model has learned the training data too closely. A small difference suggests
-        #         more consistent performance on unseen data. In this case, there is very little overfitting gap suggesting consistency. 
-        #         """)
-
-
-
-
-
-    # dataset_cfg = DATASETS[dataset]
-
-    # st.header("📊 Explore the Dataset")
-
-    # st.info(
-    #     dataset_cfg["eda_intro"]
-    # )
-
-    # st.caption(
-    #     dataset_cfg["description"]
-    # )
-
-
-    # # ==================================
-    # # 1. DATASET OVERVIEW
-    # # ==================================
-
-    # st.divider()
-
-    # st.subheader(
-    #     "1. What is in this dataset?"
-    # )
-
-    # st.caption(
-    #     "These figures give a basic overview of the size and structure "
-    #     "of the selected dataset."
-    # )
-
-
-    # dataset_info = eda.get(
-    #     "dataset_info",
-    #     {}
-    # )
-
-    # quality = eda.get(
-    #     "dataset_quality_summary",
-    #     {}
-    # )
-
-
-    # rows = quality.get(
-    #     "clean_rows",
-    #     dataset_info.get("rows", 0)
-    # )
-
-    # columns = quality.get(
-    #     "clean_columns",
-    #     dataset_info.get("columns", 0)
-    # )
-
-    # classes = len(
-    #     dataset_info.get(
-    #         "classes",
-    #         []
-    #     )
-    # )
-
-
-    # numeric_features = eda.get(
-    #     "numeric_features"
-    # )
-
-    # numeric_count = (
-    #     len(numeric_features.columns)
-    #     if isinstance(
-    #         numeric_features,
-    #         pd.DataFrame
-    #     )
-    #     else 0
-    # )
-
-
-    # c1, c2, c3, c4 = st.columns(4)
-
-    # c1.metric(
-    #     "Records",
-    #     f"{rows:,}"
-    # )
-
-    # c2.metric(
-    #     "Features",
-    #     f"{columns:,}"
-    # )
-
-    # c3.metric(
-    #     "Attack Classes",
-    #     f"{classes:,}"
-    # )
-
-    # c4.metric(
-    #     "Numerical Features",
-    #     f"{numeric_count:,}"
-    # )
-
-
-    # with st.expander(
-    #     "ℹ️ Why does this matter?"
-    # ):
-
-    #     st.write(
-    #         """
-    #         A record represents one observation in the dataset, while a
-    #         feature represents one piece of information about that observation.
-
-    #         These figures help us understand the size and complexity of the
-    #         problem before looking at the machine-learning results.
-    #         """
-    #     )
-
-
-    # # ==================================
-    # # 2. DATA QUALITY
-    # # ==================================
-
-    # st.divider()
-
-    # st.subheader(
-    #     "2. Is the data suitable for analysis?"
-    # )
-
-    # st.caption(
-    #     "Before machine learning is applied, the dataset is checked for "
-    #     "common data-quality issues."
-    # )
-
-
-    # original_rows = quality.get(
-    #     "original_rows",
-    #     rows
-    # )
-
-    # clean_rows = quality.get(
-    #     "clean_rows",
-    #     rows
-    # )
-
-    # original_duplicates = quality.get(
-    #     "original_duplicate_rows",
-    #     0
-    # )
-
-    # clean_duplicates = quality.get(
-    #     "clean_duplicate_rows",
-    #     0
-    # )
-
-    # original_missing = quality.get(
-    #     "original_missing_values",
-    #     0
-    # )
-
-    # clean_missing = quality.get(
-    #     "clean_missing_values",
-    #     0
-    # )
-
-
-    # q1, q2, q3, q4 = st.columns(4)
-
-    # q1.metric(
-    #     "Original Records",
-    #     f"{original_rows:,}"
-    # )
-
-    # q2.metric(
-    #     "Duplicate Records Identified",
-    #     f"{original_duplicates:,}"
-    # )
-
-    # q3.metric(
-    #     "Original Missing Values",
-    #     f"{original_missing:,}"
-    # )
-
-    # q4.metric(
-    #     "Records After Preparation",
-    #     f"{clean_rows:,}"
-    # )
-
-
-    # st.subheader(
-    #     "Before and after data preparation"
-    # )
-
-
-    # quality_table = pd.DataFrame({
-    #     "Check": [
-    #         "Records",
-    #         "Missing values",
-    #         "Duplicate records"
-    #     ],
-
-    #     "Before preparation": [
-    #         original_rows,
-    #         original_missing,
-    #         original_duplicates
-    #     ],
-
-    #     "After preparation": [
-    #         clean_rows,
-    #         clean_missing,
-    #         clean_duplicates
-    #     ]
-    # })
-
-
-    # st.dataframe(
-    #     quality_table,
-    #     use_container_width=True,
-    #     hide_index=True
-    # )
-
-
-    # with st.expander(
-    #     "ℹ️ Why do we check these things?"
-    # ):
-
-    #     st.write(
-    #         """
-    #         Missing values mean that some information was not recorded.
-
-    #         Duplicate records are repeated observations containing the same
-    #         recorded information.
-
-    #         These checks help us understand whether the data needs cleaning
-    #         or preparation before it is given to the machine-learning models.
-    #         """
-    #     )
-
-
-    # # ==================================
-    # # 3. CLASS DISTRIBUTION
-    # # ==================================
-
-    # st.divider()
-
-    # st.subheader(
-    #     "3. What types of activity are in the dataset?"
-    # )
-
-    # st.caption(
-    #     "This chart shows how many records belong to each traffic or "
-    #     "attack category."
-    # )
-
-
-    # class_distribution = eda.get(
-    #     "class_distribution"
-    # )
-
-
-    # if class_distribution is not None:
-
-    #     if isinstance(
-    #         class_distribution,
-    #         pd.Series
-    #     ):
-
-    #         class_dist = (
-    #             class_distribution
-    #             .sort_values(
-    #                 ascending=False
-    #             )
-    #         )
-
-    #     else:
-
-    #         class_dist = pd.Series(
-    #             class_distribution
-    #         ).sort_values(
-    #             ascending=False
-    #         )
-
-
-    #     fig, ax = plt.subplots(
-    #         figsize=(12, 6)
-    #     )
-
-    #     class_dist.plot(
-    #         kind="bar",
-    #         ax=ax
-    #     )
-
-    #     ax.set_xlabel(
-    #         "Activity / Attack Category"
-    #     )
-
-    #     ax.set_ylabel(
-    #         "Number of Records"
-    #     )
-
-    #     ax.set_title(
-    #         f"{dataset} - Class Distribution"
-    #     )
-
-    #     plt.xticks(
-    #         rotation=45,
-    #         ha="right"
-    #     )
-
-    #     plt.tight_layout()
-
-    #     st.pyplot(fig)
-
-    #     plt.close(fig)
-
-
-    #     with st.expander(
-    #         "ℹ️ How should I interpret this chart?"
-    #     ):
-
-    #         st.write(
-    #             """
-    #             Taller bars mean that the dataset contains more examples
-    #             of that category. Shorter bars mean that fewer examples
-    #             are available.
-
-    #             If some categories are much larger than others, the dataset
-    #             is imbalanced. This matters because a model may find common
-    #             categories easier to recognise than less common categories.
-
-    #             This is one reason why model evaluation considers measures
-    #             such as recall, F1 score and balanced accuracy rather than
-    #             relying only on overall accuracy.
-    #             """
-    #         )
-
-    # else:
-
-    #     st.warning(
-    #         "Class distribution information is not available."
-    #     )
-
-
-    # # ==================================
-    # # 4. FEATURE ANALYSIS
-    # # ==================================
-
-    # st.divider()
-
-    # st.subheader(
-    #     "4. What do the feature values look like?"
-    # )
-
-    # st.caption(
-    #     "Features are the pieces of information the models use to "
-    #     "distinguish different types of network behaviour."
-    # )
-
-
-    # feature_statistics = eda.get(
-    #     "feature_statistics"
-    # )
-
-
-    # if isinstance(
-    #     feature_statistics,
-    #     pd.DataFrame
-    # ):
-
-    #     st.dataframe(
-    #         styled_table(
-    #             feature_statistics
-    #         ),
-    #         use_container_width=True
-    #     )
-
-    # with st.expander(
-    #     "ℹ️ What do these statistics mean?"
-    # ):
-
-    #     st.write(
-    #         """
-    #         Mean: the average value.
-
-    #         Median: the middle value when the observations are ordered.
-
-    #         Standard deviation: how much the values vary around the average.
-
-    #         Minimum and maximum: the smallest and largest recorded values.
-
-    #         The 25% and 75% values help show where most observations fall.
-    #         """
-    #     )
-
-
-    # # ==================================
-    # # 5. BOX PLOT / OUTLIERS
-    # # ==================================
-
-    # st.subheader(
-    #     "5. Are there unusually high or low values?"
-    # )
-
-    # st.caption(
-    #     "Select a numerical feature to investigate its distribution "
-    #     "and potential outliers."
-    # )
-
-
-    # if isinstance(
-    #     numeric_features,
-    #     pd.DataFrame
-    # ) and not numeric_features.empty:
-
-    #     numeric_columns = list(
-    #         numeric_features.columns
-    #     )
-
-    #     selected_feature = st.selectbox(
-    #         "Select a feature",
-    #         numeric_columns,
-    #         key=f"eda_feature_{dataset}"
-    #     )
-
-
-    #     fig, ax = plt.subplots(
-    #         figsize=(10, 5)
-    #     )
-
-    #     ax.boxplot(
-    #         numeric_features[
-    #             selected_feature
-    #         ].dropna()
-    #     )
-
-    #     ax.set_ylabel(
-    #         selected_feature
-    #     )
-
-    #     ax.set_title(
-    #         f"{selected_feature} - Value Distribution"
-    #     )
-
-    #     plt.tight_layout()
-
-    #     st.pyplot(fig)
-
-    #     plt.close(fig)
-
-
-    #     outlier_summary = eda.get(
-    #         "outlier_summary",
-    #         {}
-    #     )
-
-    #     selected_outliers = (
-    #         outlier_summary
-    #         .get(
-    #             selected_feature,
-    #             {}
-    #         )
-    #     )
-
-
-    #     if selected_outliers:
-
-    #         st.metric(
-    #             "Potential Outliers",
-    #             f'{selected_outliers.get("Outlier_Count", 0):,}'
-    #         )
-
-
-    #     with st.expander(
-    #         "ℹ️ How should I interpret a box plot?"
-    #     ):
-
-    #         st.write(
-    #             """
-    #             The central box represents the middle portion of the data.
-
-    #             The line inside the box represents the median.
-
-    #             The whiskers show the broader typical range.
-
-    #             Points or observations outside this range may be unusually
-    #             high or low compared with most observations.
-
-    #             Unusual values are not automatically errors or attacks.
-    #             They may represent legitimate but uncommon network behaviour.
-    #             """
-    #         )
-
-
-    # # ==================================
-    # # 6. CORRELATION
-    # # ==================================
-
-    # st.divider()
-
-    # st.subheader(
-    #     "6. Do some features behave similarly?"
-    # )
-
-    # st.caption(
-    #     "This analysis shows relationships between numerical features."
-    # )
-
-
-    # correlation_matrix = eda.get(
-    #     "correlation_matrix"
-    # )
-
-
-    # if isinstance(
-    #     correlation_matrix,
-    #     pd.DataFrame
-    # ) and not correlation_matrix.empty:
-
-    #     fig, ax = plt.subplots(
-    #         figsize=(12, 8)
-    #     )
-
-    #     im = ax.imshow(
-    #         correlation_matrix.values,
-    #         aspect="auto",
-    #         cmap="Blues",
-    #         vmin=-1,
-    #         vmax=1
-    #     )
-
-    #     ax.set_xticks(
-    #         range(
-    #             len(correlation_matrix.columns)
-    #         )
-    #     )
-
-    #     ax.set_xticklabels(
-    #         correlation_matrix.columns,
-    #         rotation=90,
-    #         fontsize=7
-    #     )
-
-    #     ax.set_yticks(
-    #         range(
-    #             len(correlation_matrix.index)
-    #         )
-    #     )
-
-    #     ax.set_yticklabels(
-    #         correlation_matrix.index,
-    #         fontsize=7
-    #     )
-
-    #     ax.set_title(
-    #         f"{dataset} - Correlation Between Numerical Features"
-    #     )
-
-    #     fig.colorbar(
-    #         im,
-    #         ax=ax,
-    #         label="Correlation"
-    #     )
-
-    #     plt.tight_layout()
-
-    #     st.pyplot(fig)
-
-    #     plt.close(fig)
-
-
-    #     with st.expander(
-    #         "ℹ️ How should I interpret correlation?"
-    #     ):
-
-    #         st.write(
-    #             """
-    #             Values closer to +1 indicate a strong positive relationship.
-
-    #             Values closer to -1 indicate a strong negative relationship.
-
-    #             Values near 0 indicate little or no clear linear relationship.
-
-    #             Strong relationships can mean that two features contain
-    #             overlapping information.
-
-    #             Correlation does not mean that one feature causes another.
-    #             """
-    #         )
-
-
-    # # ==================================
-    # # 7. FEATURES USED BY MODELS
-    # # ==================================
-
-    # st.divider()
-
-    # st.subheader(
-    #     "7. Which information is used by the models?"
-    # )
-
-    # st.caption(
-    #     dataset_cfg["feature_context"]
-    # )
-
-
-    # selected_features = eda.get(
-    #     "selected_features",
-    #     []
-    # )
-
-
-    # st.write(
-    #     f"**Final modelling features: {len(selected_features)}**"
-    # )
-
-
-    # with st.expander(
-    #     "View selected features"
-    # ):
-
-    #     feature_df = pd.DataFrame({
-    #         "Feature": selected_features
-    #     })
-
-    #     st.dataframe(
-    #         feature_df,
-    #         use_container_width=True,
-    #         hide_index=True
-    #     )
-
-
-    # # ==================================
-    # # 8. MODEL GENERALISATION
-    # # ==================================
-
-    # st.divider()
-
-    # st.subheader(
-    #     "8. Does the model behave consistently on unseen data?"
-    # )
-
-    # st.caption(
-    #     "Training performance is compared with validation and testing "
-    #     "performance to look for signs of overfitting or underfitting."
-    # )
-
-
-    # generalization = eda.get(
-    #     "generalization_results",
-    #     {}
-    # )
-
-
-    # if generalization:
-
-    #     generalization_rows = []
-
-
-    #     for model_name, values in generalization.items():
-
-    #         status, explanation = (
-    #             interpret_generalization(
-    #                 values["train_accuracy"],
-    #                 values["validation_accuracy"]
-    #             )
-    #         )
-
-
-    #         generalization_rows.append({
-
-    #             "Model":
-    #                 model_name,
-
-    #             "Training Accuracy":
-    #                 pct(values["train_accuracy"]),
-
-    #             "Validation Accuracy":
-    #                 pct(values["validation_accuracy"]),
-
-    #             "Test Accuracy":
-    #                 pct(values["test_accuracy"]),
-
-    #             "Train-Test Gap":
-    #                 pct(values["train_test_accuracy_gap"]),
-
-    #             "Assessment":
-    #                 status
-    #         })
-
-
-    #     generalization_df = pd.DataFrame(
-    #         generalization_rows
-    #     )
-
-
-    #     st.dataframe(
-    #         generalization_df,
-    #         use_container_width=True,
-    #         hide_index=True
-    #     )
-
-
-    #     with st.expander(
-    #         "ℹ️ What do overfitting and underfitting mean?"
-    #     ):
-
-    #         st.write(
-    #             """
-    #             Training performance shows how well the model performs on
-    #             the data it learned from.
-
-    #             Validation and testing performance show how well the model
-    #             performs on data it did not use to learn.
-
-    #             If training performance is much higher than validation or
-    #             testing performance, the model may be overfitting. This means
-    #             it may have learned the training examples too closely.
-
-    #             If both training and validation performance are relatively
-    #             low, the model may be underfitting. This can happen when the
-    #             model is not capturing enough of the useful patterns in
-    #             the dataset.
-
-    #             These are indicative assessments rather than definitive
-    #             diagnoses of model behaviour.
-    #             """
-    #         )
-
-
-    # # ==================================
-    # # 9. WHAT DID WE LEARN?
-    # # ==================================
-
-    # st.divider()
-
-    # st.subheader(
-    #     "9. What did we learn from this dataset?"
-    # )
-
-
-    # best_model = (
-    #     results_df
-    #     .sort_values(
-    #         "Weighted_F1",
-    #         ascending=False
-    #     )
-    #     .iloc[0]
-    # )
-
-
-    # st.info(
-    #     f"""
-    #     The selected dataset contains {rows:,} records and
-    #     {classes:,} activity or attack categories.
-
-    #     The dataset was examined for missing values, duplicate records,
-    #     class distribution, feature behaviour and relationships between
-    #     numerical features.
-
-    #     The final modelling features were prepared before the machine-learning
-    #     models were trained.
-
-    #     Based on the saved model evaluation results, the highest weighted
-    #     F1 score was achieved by **{best_model["Model"]}**.
-
-    #     The next step is to compare the models in more detail or use a trained
-    #     model to analyse an individual network record.
-    #     """
-    # )
-    
 # ------------------------------
 # PAGE: MODEL PERFORMANCE
 # ------------------------------
@@ -3009,31 +1486,12 @@ elif page == "Model Performance":
             m3.metric("Weighted F1", f'{row["Weighted_F1"]:.2%}')
             m4.metric("Macro F1", f'{row["Macro_F1"]:.2%}')
     
-        # numeric_cols = results_df.select_dtypes(include=np.number).columns
-    
-        # styled_df = (
-        #     results_df.style
-        #     .format({col: "{:.4f}" for col in numeric_cols})
-        #     .highlight_max(
-        #         subset=["Accuracy","Balanced_Accuracy", "Weighted_F1","Macro_F1", "ROC_AUC"],
-        #         color="#d4edda"
-        #     )
-        # )
-        
         st.dataframe(
             styled_table(results_df),
             hide_index=True,
             use_container_width=True
         )
     
-        # n = min(
-        #     len(eval_labels),
-        #     len(y_pred_eval)
-        # )
-        
-        # y_true = np.array(eval_labels)[:n]
-        # y_pred = np.array(y_pred_eval)[:n]
-        
     with model_comparison_tabs[1]:
         st.subheader("Confusion Matrix on saved evaluation sample")
     
@@ -3092,8 +1550,7 @@ elif page == "Model Performance":
 # PAGE: ABOUT
 # ------------------------------
 elif page == "About":
-    # st.header("🛡️ XAI Dashboard for Cyber Threat Identification in Smart IoT Systems")
-    
+
     about_page_tabs = st.tabs([
         "About this Dashboard", "Machine Learning Models Used", "Understanding Model Evaluation Metrics", "Dashboard Pages", "What a User Gets From This System"])
 
@@ -3105,14 +1562,13 @@ elif page == "About":
             improve cyber threat identification within Smart Internet of Things (IoT)
             environments.
             
-            It uses five machine learning models trained on public IoT datasets to analyse IoT network activity, 
-            and identify potentially malicious behaviour and explains their predictions. It allows users to explore 
+            It uses five machine learning models trained on public IoT datasets to analyse network activity, 
+            identify potentially malicious behaviour and explain their predictions. It allows users to explore 
             the data, check its quality, compare different machine-learning models, upload data for predictions, 
             and understand why the model made a particular decision using SHAP XAI technique.
             
-            Unlike traditional intrusion detection systems that simply classify traffic, this dashboard provides 
-            transparent, interpretable and trustworthy explanations so that security analysts can
-            understand the reasoning behind every prediction.
+            This dashboard provides transparent, interpretable and understandable explanations so that 
+            security analysts can understand the reasoning behind every prediction.
             """
         )
 
@@ -3251,11 +1707,11 @@ elif page == "About":
     
         - Check data quality problems
     
-        - Compare different AI models
+        - Compare different trained ML models
     
         - Detect possible cyber attacks
     
-        - Understand why the AI selected a specific threat category
+        - Understand why the system selected a specific threat category
     
         - Make better security decisions using explainable AI
         """
@@ -3498,7 +1954,6 @@ elif page == "Explainability":
                 
                 Positive contributions support the predicted class, while negative contributions move the prediction away from it.
                 """)
-            # st.write("CALLER x_row shape:", x_row.shape)
             
             pred_label = plot_lr_reasoning(selected_model, x_row, feature_names, target_encoder)
             st.success(f"Predicted class: {pred_label}")
@@ -3512,20 +1967,16 @@ elif page == "Explainability":
                 particular attack class. The baseline is basically the model's starting point. Each 
                 feature then pushes the decision in one direction or the other until the final prediction is reached.
 
-                • Each bar on the waterfall plot represents a feature that influenced the prediction. 
-                Larger bars indicate a stronger influence on this particular decision.
-                
-                • Colour: Red pushes the prediction higher while blue pushes the prediction lower.
-            
-                • Features pushing the prediction towards the predicted class are shown as postive 
+                - Each bar on the waterfall plot represents a feature that influenced the prediction. 
+                Larger bars indicate a stronger influence on this particular decision. 
+                - Colour: Red pushes the prediction higher while blue pushes the prediction lower. 
+                - Features pushing the prediction towards the predicted class are shown as postive 
                 contributions and therefore increase the model's output, while features pushing 
                 it away are shown as negative contributions and therefore reduce the model's output. 
-            
-                • E[f(X)] represents the model's baseline output which is what the model would expect 
+                - E[f(X)] represents the model's baseline output which is what the model would expect 
                 before considering the specific features of this network record. The individual feature 
-                contributions are added to this baseline to arrive at f(x), the model output for the selected record.
-            
-                • The final output represents the model's decision for this record.
+                contributions are added to this baseline to arrive at f(x), the model output for the selected record. 
+                - The final output represents the model's decision for this record. 
                 """)
             
             background = eval_sample.sample(
@@ -3581,36 +2032,6 @@ elif page == "Explainability":
 
 
         if selected_model_name == "Logistic Regression": 
-            # background = eval_sample.sample(
-            #     n=min(1000, len(eval_sample)),
-            #     random_state=42
-            # )
-                    
-            # lr = selected_model.named_steps["lr"]
-                    
-            # explainer = shap.LinearExplainer(
-            #     lr,
-            #     background
-            # )
-                    
-            # shap_values = explainer.shap_values(background)
-                    
-            # plt.figure(figsize=(13,6))
-        
-            # plt.title(f"{selected_model_name} - SHAP Global Feature Importance")
-                    
-            # shap.summary_plot(
-            #     shap_values,
-            #     background,
-            #     show=False
-            # )
-                    
-            # st.pyplot(plt.gcf())
-                    
-            # plt.close()
-
-
-
 
             background = eval_sample.sample(
                 n=min(1000, len(eval_sample)),
@@ -3656,118 +2077,6 @@ elif page == "Explainability":
             st.pyplot(plt.gcf())
             plt.close()
 
-
-
-
-
-            # # # Convert SHAP values to a numpy array
-            # # shap_array = np.asarray(shap_values.values if hasattr(shap_values, "values") else shap_values)
-            
-            # # # Select the predicted class
-            # # pred = selected_model.predict(x_row)
-            # # class_idx = int(pred[0])
-            
-            # # # For multiclass SHAP: (samples, features, classes)
-            # # if shap_array.ndim == 3:
-            # #     shap_for_class = shap_array[:, :, class_idx]
-            # # else:
-            # #     shap_for_class = shap_array
-            
-            # # # Force numeric dtype
-            # # shap_for_class = np.asarray(shap_for_class, dtype=np.float64)
-            
-            # # # Make sure feature data is numeric too
-            # # X_plot = background.copy()
-            
-            # # for col in X_plot.columns:
-            # #     X_plot[col] = pd.to_numeric(X_plot[col], errors="coerce")
-            
-            # # X_plot = X_plot.astype(np.float64)
-            
-            # # # Plot
-            # # fig = plt.figure(figsize=(12, 8))
-            
-            # # shap.summary_plot(
-            # #     shap_for_class,
-            # #     X_plot,
-            # #     feature_names=X_plot.columns,
-            # #     show=False,
-            # #     max_display=15
-            # # )
-            
-            # # plt.tight_layout()
-            # # st.pyplot(fig)
-            # # plt.close(fig)
-
-
-
-
-            # shap_array = np.asarray(
-            #     shap_values.values if hasattr(shap_values, "values") else shap_values,
-            #     dtype=np.float64
-            # )
-            
-            # if shap_array.ndim == 3:
-            #     # samples × features × classes
-            #     global_importance = np.mean(
-            #         np.abs(shap_array),
-            #         axis=(0, 2)
-            #     )
-            # else:
-            #     # samples × features
-            #     global_importance = np.mean(
-            #         np.abs(shap_array),
-            #         axis=0
-            #     )
-            
-            # # importance_df = pd.DataFrame({
-            # #     "Feature": background.columns,
-            # #     "Mean |SHAP|": global_importance
-            # # }).sort_values(
-            # #     "Mean |SHAP|",
-            # #     ascending=False
-            # # )
-            
-            # # st.dataframe(
-            # #     importance_df.head(20),
-            # #     use_container_width=True
-            # # )
-
-
-
-            # pred = selected_model.predict(x_row)
-            # class_idx = int(pred[0])
-            
-            # shap_class = shap_array[:, :, class_idx]
-            
-            # shap.summary_plot(
-            #     shap_class,
-            #     background,
-            #     feature_names=background.columns,
-            #     max_display=15,
-            #     show=False
-            # )
-
-
-        # if selected_model_name != "Logistic Regression":
-        #     try:
-        #         background = eval_sample.sample(
-        #             n=min(1000, len(eval_sample)),
-        #             random_state=42
-        #         )
-        #         explainer = shap.TreeExplainer(selected_model)
-        #         shap_values_bg = explainer.shap_values(background)
-
-        #         fig = plt.figure(figsize=(13, 6))
-        #         shap.summary_plot(shap_values_bg, background, show=False)
-        #         plt.tight_layout(pad=2)
-        #         st.pyplot(fig)
-        #         plt.close(fig)
-        #     except Exception as e:
-        #         st.warning(f"SHAP summary plot could not be rendered here: {e}")
-
-
-
         elif selected_model_name != "Logistic Regression":
             try:
                 background = eval_sample.sample(
@@ -3807,20 +2116,17 @@ elif page == "Explainability":
                 The beeswarm plot shows which features generally have the greatest influence
                 on the model across many network records.
                 
-                • Each dot: Represents one network record. The position of the dot shows 
-                whether that feature pushed the model's output higher or lower for that observation.
-                
-                • Vertical position: Features at the top have greater overall influence on the model, 
+                - Each dot: Represents one network record. The position of the dot shows 
+                whether that feature pushed the model's output higher or lower for that observation. 
+                - Vertical position: Features at the top have greater overall influence on the model, 
                 while features near the bottom have less influence. 
                 Each point represents the effect of a feature for an individual
-                record. It means the model found these features useful when distinguishing between attack classes.
-                
-                • Horizontal position: shows the direction and strength of the feature's influence for individual records.
+                record. It means the model found these features useful when distinguishing between attack classes. 
+                - Horizontal position: shows the direction and strength of the feature's influence for individual records.
                 A point further to the right indicates a stronger positive contribution to the model output being explained.
-                A point further to the left indicates a stronger negative contribution.
-                
-                • Colour: Red represents relatively high feature values and blue represents
-                  relatively low feature values.
+                A point further to the left indicates a stronger negative contribution. 
+                - Colour: Red represents relatively high feature values and blue represents
+                  relatively low feature values. 
                   """)
 
             
@@ -3844,15 +2150,7 @@ elif page == "Explainability":
         reasoning_cols[0].metric("Predicted class", pred_label)
         reasoning_cols[1].metric("Confidence", f"{confidence:.2%}")
 
-        # proba_df = pd.DataFrame(
-        #     [proba[0]],
-        #     columns=target_encoder.classes_
-        # ).T
-        # proba_df.columns = ["Probability"]
-        # proba_df = proba_df.sort_values(by="Probability", ascending=False)
-
-        # st.dataframe(proba_df, use_container_width=True)
-
+ 
         st.subheader("Top Reasons For The Prediction")
 
         st.write("""
@@ -3881,10 +2179,6 @@ elif page == "Explainability":
             st.subheader("Generated Explanation")
             
             top_reasons = reason_df.head(5)
-
-            # st.write("Top coefficient-driven reasons:")
-            # st.dataframe(top_reasons, use_container_width=True)
-            
 
             explanation = (
                 f"The model predicted **{pred_label}** with a confidence of "

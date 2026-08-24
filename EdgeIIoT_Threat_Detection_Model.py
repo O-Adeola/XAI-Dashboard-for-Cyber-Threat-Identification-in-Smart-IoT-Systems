@@ -85,13 +85,6 @@ print("Duplicates before cleaning:", df.duplicated().sum())
 
 missing_before = df.isnull().sum().sum()
 
-# missing_summary = pd.DataFrame({
-#     "Feature": missing_values.index,
-#     "Missing Values": missing_values.values,
-#     "Percent Missing":
-#         (missing_values.values / len(df)) * 100
-# })
-
 
 dataset_quality = {
     "rows": len(df),
@@ -119,7 +112,6 @@ df['Attack_type'].value_counts().plot(
 )
 
 plt.title("Attack Class Distribution Before Cleaning")
-# plt.show()
 
 
 plt.savefig(
@@ -147,7 +139,6 @@ drop_columns = [c for c in drop_columns if c in df.columns]
 df = df.drop(columns=drop_columns)
 
 
-# df = df.dropna(axis=0, how="any")
 
 duplicates_before = int(
     df.duplicated().sum()
@@ -175,24 +166,6 @@ print(df["Attack_type"].value_counts())
 
 
 
-
-
-
-# df.isnull().sum() 
-
-# df.isnull().sum().sum() 
-
-# print(df["Attack_type"].isna().sum()) 
-
-# df = df.dropna(subset=["Attack_type"])
-
-
-
-# df.replace([np.inf, -np.inf], np.nan, inplace=True) 
-
-# df.fillna(0, inplace=True)
-
-
 # In[7]:
 
 
@@ -211,32 +184,6 @@ dataset_quality["removed_columns"] = drop_columns
 # ==================================
 
 clean_df = df.copy()
-
-
-# In[ ]:
-
-
-
-
-
-# In[9]:
-
-
-# # ==================================
-# # DATASET QUALITY
-# # ==================================
-
-# missing_values_after = df.isnull().sum()
-
-# missing_summary_after = pd.DataFrame({
-#     "Feature": missing_values.index,
-#     "Missing Values": missing_values.values,
-#     "Percent Missing":
-#         (missing_values.values / len(df)) * 100
-# })
-
-# print(missing_values_after)
-# print(missing_summary_after)
 
 
 # In[10]:
@@ -259,21 +206,6 @@ print(dataset_quality_after)
 print(df["Attack_type"].value_counts())
 
 
-# In[11]:
-
-
-# target_col = "Attack_type"
-
-# X = df.drop(columns=[target_col])
-# y = df[target_col]#.astype(str)
-
-# le = LabelEncoder()
-# y_enc = le.fit_transform(y)
-
-# print("Classes:", list(le.classes_))
-# print("X shape:", X.shape)
-
-
 # In[12]:
 
 
@@ -289,7 +221,6 @@ df['Attack_type'].value_counts().plot(
 )
 
 plt.title("Attack Class Distribution After Cleaning")
-# plt.show()
 
 
 plt.savefig(
@@ -300,24 +231,6 @@ plt.savefig(
 plt.show()
 
 
-# In[13]:
-
-
-#DROP IP ADDRESSES 
-# drop_cols = ["src_ip", 
-#              "dst_ip", 
-#              "dns_query", 
-#              "ssl_subject", 
-#              "ssl_issuer", 
-#              "http_uri", 
-#              "http_user_agent", 
-#              "http_orig_mime_types", 
-#              "http_resp_mime_types"
-#             ]
-
-# df = df.drop(columns=drop_cols, errors="ignore")
-
-
 # In[14]:
 
 
@@ -326,7 +239,6 @@ plt.show()
 # TRAIN-VALIDATE-TEST 
 # ===================
 
-# df = df.dropna(subset=["Attack_type"])
 
 import re
 
@@ -347,19 +259,6 @@ print(target_encoder.classes_)
 
 
 print(np.unique(y))
-
-
-# In[ ]:
-
-
-
-
-
-# In[15]:
-
-
-# X = df.drop(columns=["Attack_type"])
-# y = df["Attack_type"]
 
 
 # In[16]:
@@ -386,12 +285,6 @@ print("Validation:", X_val.shape)
 print("Test:", X_test.shape)
 
 
-# In[ ]:
-
-
-
-
-
 # In[17]:
 
 
@@ -411,46 +304,12 @@ for col in cat_cols:
     )
 
 
-# In[ ]:
-
-
-
-
-
 # In[18]:
 
 
 X_train = X_train.copy()
 X_val = X_val.copy()
 X_test = X_test.copy()
-
-
-# In[19]:
-
-
-# #===================
-# #ENCODE CATEGORICAL COLUMNS 
-# #===================
-# def encode_text_dummy(df, name):
-#     if name in df.columns:
-#         dummies = pd.get_dummies(df[name], prefix=name)
-#         df = pd.concat([df.drop(columns=[name]), dummies], axis=1)
-#     return df
-
-# categorical_to_encode = [
-#     "http.request.method",
-#     "http.referer",
-#     "http.request.version",
-#     "dns.qry.name.len",
-#     "mqtt.conack.flags",
-#     "mqtt.protoname",
-#     "mqtt.topic"
-# ]
-
-# for col in categorical_to_encode:
-#     df = encode_text_dummy(df, col)
-
-# print("Shape after dummy encoding:", df.shape)
 
 
 # In[20]:
@@ -460,32 +319,11 @@ X_test = X_test.copy()
 # FEATURE (ORDINAL) ENCODING
 # ==================================
 
-# cat_cols = X_train.select_dtypes(
-#     include=["object", "string"]
-# ).columns
 
 encoder = OrdinalEncoder(
     handle_unknown="use_encoded_value",
     unknown_value=-1
 )
-
-# encoder = OneHotEncoder(
-#     handle_unknown="ignore",
-#     sparse_output=False
-# )
-
-# X_train[cat_cols] = encoder.fit_transform(
-#     X_train[cat_cols]
-# )
-
-# X_val[cat_cols] = encoder.transform(
-#     X_val[cat_cols]
-# )
-
-# X_test[cat_cols] = encoder.transform(
-#     X_test[cat_cols]
-# )
-
 
 
 
@@ -699,29 +537,6 @@ def evaluate_model(model_name, model, X_data, y_true):
 results = []
 
 
-# In[25]:
-
-
-# clean_df.to_csv(
-#     "datasets/EdgeIIoT/artifacts/clean_dataset.csv",
-#     index=False
-# )
-
-
-# In[26]:
-
-
-# training_summary = pd.DataFrame({
-#     "Train Accuracy":[train_accuracy],
-#     "Test Accuracy":[test_accuracy],
-#     "Overfitting":[train_accuracy-test_accuracy]
-# })
-
-# training_summary.to_csv(
-#     "datasets/EdgeIIoT/artifacts/training_summary.csv",
-#     index=False
-# )
-
 
 # In[27]:
 
@@ -895,28 +710,6 @@ results.append(
         y_test
     )
 )
-
-
-# In[32]:
-
-
-# # ===================
-# # SPLIT FEATURES/TARGET 
-# # TRAIN-VALIDATE-TEST 
-# # ===================
-
-# df = df.dropna(subset=["Attack_type"])
-
-# X = df.drop(columns=["Attack_type"])
-# y = df["Attack_type"]
-
-# target_encoder = LabelEncoder()
-# y_enc = target_encoder.fit_transform(y_train)
-
-# print(target_encoder.classes_)
-
-
-# print(np.unique(y))
 
 
 # In[33]:
@@ -1215,9 +1008,6 @@ for name, model in top_models.items():
 
 def plot_feature_importance(model, model_name, feature_names):
 
-    # -----------------------------
-    # Extract actual estimator if pipeline
-    # -----------------------------
     if hasattr(model, "named_steps"):
         model = model.named_steps[list(model.named_steps.keys())[-1]]
 
@@ -1228,7 +1018,7 @@ def plot_feature_importance(model, model_name, feature_names):
         importances = model.feature_importances_
 
     # -----------------------------
-    # Linear models (Logistic Regression, SVM linear)
+    # Logistic Regression
     # -----------------------------
     elif hasattr(model, "coef_"):
         importances = np.abs(model.coef_[0])
@@ -1573,14 +1363,13 @@ class_idx = 0
 # explainer
 rf_explainer = shap.TreeExplainer(rf)
 
-# shap values (your shape: samples, features, classes)
+# shap values 
 rf_shap_values = rf_explainer.shap_values(sample)
 
 # pick instance + class
 row_idx = 0
 class_idx = 0
 
-# IMPORTANT: make row 2D
 single_row = sample.iloc[[row_idx]].values
 
 # FORCE PLOT 
@@ -1683,14 +1472,6 @@ shap.plots.force(
 
 #EXPLAIN LR PREDICTION 
 
-# background = X_train.sample(n=min(5000, len(X_train)), random_state=42)
-# X_explain = X_test.sample(n=min(5000, len(X_test)), random_state=42)
-
-
-# background = background.astype(np.float64)
-# X_explain = X_explain.astype(np.float64)
-
-
 background = X_train.sample(
     n=min(5000, len(X_train)),
     random_state=42
@@ -1737,115 +1518,6 @@ shap.plots.beeswarm(lr_shap_values[:, :, pred_class])
 
 
 shap.plots.force(lr_shap_values[row_idx, :, pred_class])
-
-
-# In[70]:
-
-
-# from pathlib import Path
-
-# # ARTIFACTS_DIR = Path("artifacts/edgeiiot")
-# # MODEL_DIR = Path("models/edgeiiot")
-# # ARTIFACTS_DIR.mkdir(exist_ok=True)
-# # MODEL_DIR.mkdir(exist_ok=True)
-
-
-# PROJECT_DIR = Path.cwd().resolve()
-# if PROJECT_DIR.name.lower() == "notebooks":
-#     PROJECT_DIR = PROJECT_DIR.parent
-
-# MODEL_DIR = PROJECT_DIR / "datasets" / "edgeiot" / "models"
-# ARTIFACTS_DIR = PROJECT_DIR / "datasets" / "edgeiot" / "artifacts"
-
-# MODEL_DIR.mkdir(parents=True, exist_ok=True)
-# ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
-
-
-
-# # Save trained models
-# joblib.dump(rf, MODEL_DIR / "random_forest.pkl")
-# joblib.dump(dt, MODEL_DIR / "decision_tree.pkl")
-# joblib.dump(lgb, MODEL_DIR / "lightgbm.pkl")
-# joblib.dump(xgb, MODEL_DIR / "xgboost.pkl")
-# joblib.dump(lr_pipeline, MODEL_DIR / "logistic_regression.pkl")
-
-# # Save encoders and metadata
-# # joblib.dump(encoder, ARTIFACTS_DIR / "feature_encoder.pkl")
-# # joblib.dump(target_encoder, ARTIFACTS_DIR / "target_encoder.pkl")
-# # joblib.dump(list(X_train.columns), ARTIFACTS_DIR / "feature_names.pkl")
-# # joblib.dump(list(cat_cols), ARTIFACTS_DIR / "categorical_columns.pkl")
-# # joblib.dump(drop_cols, ARTIFACTS_DIR / "drop_columns.pkl")
-
-# joblib.dump(target_encoder, ARTIFACTS_DIR / "target_encoder.pkl")
-# joblib.dump(list(X_train.columns), ARTIFACTS_DIR / "feature_names.pkl")
-# joblib.dump(drop_columns, ARTIFACTS_DIR / "drop_columns.pkl")
-# joblib.dump(categorical_to_encode, ARTIFACTS_DIR / "categorical_columns.pkl")
-
-
-# # Save results table
-# results_df.to_csv(ARTIFACTS_DIR / "results.csv", index=False)
-
-# # Save evaluation sample for confusion matrices and SHAP
-# # eval_sample = X_test.sample(n=min(5000, len(X_test)), random_state=42)
-# # eval_labels = y_test.loc[eval_sample.index].to_numpy()
-
-
-# # sample_idx = np.random.RandomState(42).choice(
-# #     len(X_test),
-# #     size=min(5000, len(X_test)),
-# #     replace=False
-# # )
-
-# # eval_sample = X_test.iloc[sample_idx]
-# # eval_labels = y_test[sample_idx]
-
-
-# eval_sample = X_test.sample(
-#     n=min(5000, len(X_test)),
-#     random_state=42
-# )
-
-# joblib.dump(
-#     eval_sample,
-#     ARTIFACTS_DIR / "eval_sample.pkl"
-# )
-
-# joblib.dump(
-#     y_test.loc[eval_sample.index]
-#     if hasattr(y_test, "loc")
-#     else y_test[:len(eval_sample)],
-#     ARTIFACTS_DIR / "eval_labels.pkl"
-# )
-
-
-# # eval_sample.to_csv(ARTIFACTS_DIR / "eval_sample.csv", index=False)
-# # joblib.dump(eval_labels, ARTIFACTS_DIR / "eval_labels.pkl")
-
-
-# reports = {}
-
-# for name, model in top_models.items():
-
-#     preds = model.predict(X_test)
-
-#     reports[name] = classification_report(
-#         y_test,
-#         preds,
-#         target_names=target_encoder.classes_,
-#         output_dict=True,
-#         zero_division=0
-#     )
-
-# joblib.dump(
-#     reports,
-#     ARTIFACTS_DIR / "classification_reports.pkl"
-# )
-
-
-# In[ ]:
-
-
-
 
 
 # In[71]:
@@ -1897,18 +1569,6 @@ duplicates_removed = (
     original_duplicate_rows -
     prepared_duplicate_rows
 )
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
 
 
 # In[73]:
@@ -1997,12 +1657,6 @@ joblib.dump(
     drop_columns,
     ARTIFACTS_DIR / "drop_columns.pkl"
 )
-
-# joblib.dump(
-#     list(categorical_to_encode),
-#     ARTIFACTS_DIR / "categorical_columns.pkl"
-# )
-
 
 
 
@@ -2101,20 +1755,6 @@ joblib.dump(df["Attack_type"].value_counts(),
 
 joblib.dump(feature_importance,
             ARTIFACTS_DIR / "feature_importance.pkl")
-
-
-# In[76]:
-
-
-# missing_summary.to_csv(
-
-#     ARTIFACTS_DIR /
-
-#     "missing_values.csv",
-
-#     index=False
-
-# )
 
 
 # In[77]:
@@ -2283,8 +1923,6 @@ dataset_quality_summary = {
     "duplicates_removed":
         duplicates_removed,
 
-    # "removed_columns":
-    #     drop_cols
 }
 
 
@@ -2490,228 +2128,4 @@ joblib.dump(
     EDA_DIR /
     "correlation_matrix.pkl"
 )
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[86]:
-
-
-#===================
-#FEATURE IMPORTANCE (QUICK INSIGHT) 
-#===================
-
-plt.figure(figsize=(10,6))
-plt.bar(range(len(xgb.feature_importances_)), xgb.feature_importances_)
-plt.title("Feature Importance (XGBoost)")
-plt.show()
-
-
-# In[87]:
-
-
-predictedValue = rf.predict(X_test)
-print(predictedValue)
-
-
-# In[88]:
-
-
-rf_preds = rf.predict(X_test)
-
-comparison_df = pd.DataFrame({
-    "Actual": target_encoder.inverse_transform(y_test),
-    "Predicted": target_encoder.inverse_transform(rf_preds)
-})
-
-comparison_df.head(20)
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[89]:
-
-
-import os
-
-print(os.getcwd())
-
-
-# In[90]:
-
-
-import os
-
-print(os.path.exists("models"))
-print(os.path.exists("artifacts"))
-
-
-# In[91]:
-
-
-os.listdir("models")
-
-
-# In[92]:
-
-
-os.listdir("artifacts")
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[93]:
-
-
-from pathlib import Path
-import os
-
-# Change this to the correct dataset folder if needed
-BASE_DIR = Path.cwd()
-
-print("=" * 80)
-print("CURRENT WORKING DIRECTORY")
-print("=" * 80)
-print(BASE_DIR)
-
-print()
-
-# Search for every folder called artifacts or models
-for root, dirs, files in os.walk(BASE_DIR):
-
-    folder_name = Path(root).name.lower()
-
-    if folder_name in ["artifacts", "models"]:
-
-        print("=" * 80)
-        print(f"FOLDER : {root}")
-        print("=" * 80)
-
-        if len(files) == 0:
-            print("No files found.")
-
-        for f in sorted(files):
-
-            path = Path(root) / f
-
-            try:
-                size = round(path.stat().st_size / 1024, 2)
-            except:
-                size = "Unknown"
-
-            print(f"{f:<40} {size} KB")
-
-        print()
-
-
-# In[94]:
-
-
-import streamlit as st
-
-st.sidebar.write("BASE_DIR:", BASE_DIR)
-st.sidebar.write("ASSETS_DIR:", ASSETS_DIR)
-st.sidebar.write(DATASETS[dataset]["models_dir"])
-st.sidebar.write(DATASETS[dataset]["artifacts_dir"])
-
-
-# In[ ]:
-
-
-import pandas as pd
-from pathlib import Path
-
-BASE_DIR = Path.cwd()
-
-results_files = list(BASE_DIR.rglob("results.csv"))
-
-print("=" * 80)
-print("RESULTS FILES FOUND")
-print("=" * 80)
-
-for file in results_files:
-
-    print("\n")
-    print(file)
-
-    df = pd.read_csv(file)
-
-    print("\nColumns:")
-
-    for c in df.columns:
-        print("-", c)
-
-    print("\nFirst five rows:")
-
-    display(df.head())
-
-
-# In[ ]:
-
-
-from pathlib import Path
-
-BASE_DIR = Path.cwd()
-
-print("=" * 80)
-print("FEATURE FILES")
-print("=" * 80)
-
-keywords = [
-
-    "feature",
-
-    "importance",
-
-    "selected",
-
-    "ranking"
-
-]
-
-for file in BASE_DIR.rglob("*"):
-
-    if file.is_file():
-
-        name = file.name.lower()
-
-        if any(k in name for k in keywords):
-
-            print(file)
 

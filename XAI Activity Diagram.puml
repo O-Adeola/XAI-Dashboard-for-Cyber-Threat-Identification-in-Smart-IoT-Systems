@@ -1,0 +1,99 @@
+@startuml
+
+' title Activity Diagram for XAI Dashboard 
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam activity {
+    ' BackgroundColor #EAF2F8
+    ' BorderColor #1A40A3
+    ' DiamondBackgroundColor #D9EAF7
+    ' DiamondBorderColor #1A40A3
+    StartColor #000000
+    EndColor #D32F2F
+    BarColor #1A40A3
+}
+
+start
+
+:Open Dashboard;
+:Load dataset-specific models and artefacts;
+
+if (Required artefacts available?) then (Yes)
+    
+    :Render dashboard interface;
+    :Select preferred trained ML model;
+
+    repeat 
+    
+        if (Review overview?) then (Yes)
+        
+            :Display overview;
+            :Show best model and
+            summary performance metrics;
+
+        elseif (Analyse dataset?) then (Yes)
+
+            :Display Dataset Analysis page;
+            :Show dataset information,
+            missing values and EDA outputs;
+
+        elseif (Compare models?) then (Yes)
+
+            :Display Model Comparison page;
+            :Show performance table,
+            confusion matrix and
+            classification report;
+
+        elseif (Run prediction) then (Yes)
+
+            :Display Prediction page;
+            :Select input source;
+            if (Saved evaluation sample?) then (Yes)
+                :Load saved evaluation sample;
+            else (CSV upload)
+                :Read uploaded CSV file;
+                :Validate file type and structure;
+            endif
+            :Input row index to inspect;
+            :Run prediction using preferred ML model;
+            :Calculate predicted class,
+            confidence and probabilities;
+
+            :Open Explainability page;
+
+        elseif (Explain Results) then (Yes)
+
+            :Select preferred model;
+
+            if (Selected model is Logistic Regression?) then (Yes)
+
+                :Calculate coefficient-based
+                feature reasoning;
+                :Generate bar plot;
+
+            else (Tree-based model)
+
+                :Calculate local SHAP values;
+                :Generate waterfall explanation;
+
+            endif
+
+            :Display top contributing features;
+            :Display plain-language reasoning;
+            :Display explanation and
+            recommended investigation points;
+
+        endif
+
+        :Display selected task output;
+
+    repeat while (User selects another task?) is (Yes) not (No)
+
+else (No)
+    :Display missing artefact error message;
+endif
+
+stop
+
+@enduml
