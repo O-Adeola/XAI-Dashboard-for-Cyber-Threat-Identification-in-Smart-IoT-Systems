@@ -2065,6 +2065,22 @@ elif page == "Explainability":
 
             st.subheader(f"{selected_model_name} - SHAP Global Feature Importance Beeswarm Plot")
 
+            st.write("""
+                    The beeswarm plot shows which features generally have the greatest influence
+                    on the model across many network records.
+                    
+                    - Each dot: Represents one network record. The position of the dot shows 
+                    whether that feature pushed the model's output higher or lower for that observation. 
+                    - Vertical position: Features at the top have greater overall influence on the model, 
+                    while features near the bottom have less influence. 
+                    Each point represents the effect of a feature for an individual
+                    record. It means the model found these features useful when distinguishing between attack classes. 
+                    - Horizontal position: shows the direction and strength of the feature's influence for individual records.
+                    A point further to the right indicates a stronger positive contribution to the model output being explained.
+                    A point further to the left indicates a stronger negative contribution. 
+                    - Colour: Red represents relatively high feature values and blue represents
+                    relatively low feature values. 
+                    """)
 
             shap.summary_plot(
                 shap_values,
@@ -2093,7 +2109,25 @@ elif page == "Explainability":
                 plt.figure(figsize=(13, 6))
 
                 st.subheader(f"{selected_model_name} - SHAP Global Feature Importance Beeswarm Plot")
-        
+
+                st.write("""
+                        The beeswarm plot shows which features generally have the greatest influence
+                        on the model across many network records.
+                        
+                        - Each dot: Represents one network record. The position of the dot shows 
+                        whether that feature pushed the model's output higher or lower for that observation. 
+                        - Vertical position: Features at the top have greater overall influence on the model, 
+                        while features near the bottom have less influence. 
+                        Each point represents the effect of a feature for an individual
+                        record. It means the model found these features useful when distinguishing between attack classes. 
+                        - Horizontal position: shows the direction and strength of the feature's influence for individual records.
+                        A point further to the right indicates a stronger positive contribution to the model output being explained.
+                        A point further to the left indicates a stronger negative contribution. 
+                        - Colour: Red represents relatively high feature values and blue represents
+                        relatively low feature values. 
+                        """)
+
+
                 shap.summary_plot(
                     shap_values_bg,
                     background,
@@ -2110,25 +2144,6 @@ elif page == "Explainability":
                 st.warning(
                     f"SHAP summary plot could not be rendered here: {e}"
                 )
-
-
-        st.write("""
-                The beeswarm plot shows which features generally have the greatest influence
-                on the model across many network records.
-                
-                - Each dot: Represents one network record. The position of the dot shows 
-                whether that feature pushed the model's output higher or lower for that observation. 
-                - Vertical position: Features at the top have greater overall influence on the model, 
-                while features near the bottom have less influence. 
-                Each point represents the effect of a feature for an individual
-                record. It means the model found these features useful when distinguishing between attack classes. 
-                - Horizontal position: shows the direction and strength of the feature's influence for individual records.
-                A point further to the right indicates a stronger positive contribution to the model output being explained.
-                A point further to the left indicates a stronger negative contribution. 
-                - Colour: Red represents relatively high feature values and blue represents
-                  relatively low feature values. 
-                  """)
-
             
             
     # 3) REASONING
@@ -2193,7 +2208,7 @@ elif page == "Explainability":
                 )
 
                 explanation += (
-                    f"\n• {row['Feature']} "
+                    f"\n- {row['Feature']} "
                     f"({direction} likelihood, "
                     f"SHAP={row['Coefficient']:.3f})\n"
                 )
@@ -2279,7 +2294,7 @@ elif page == "Explainability":
                     )
 
                     explanation += (
-                        f"\n• {row['Feature']} "
+                        f"\n- {row['Feature']} "
                         f"({direction} likelihood, "
                         f"SHAP={row['SHAP Value']:.3f})\n"
                     )
