@@ -692,7 +692,7 @@ def pct(value):
     return f"{float(value) * 100:.2f}%"
 
 
-def interpret_generalisation(
+def interpret_generalization(
     train_accuracy,
     validation_accuracy
 ):
@@ -1345,28 +1345,28 @@ elif page == "Dataset Analysis":
                 )
             
             
-                generalisation = eda.get(
-                    "generalisation_results",
+                generalization = eda.get(
+                    "generalization_results",
                     {}
                 )
             
             
-                if generalisation:
+                if generalization:
             
-                    generalisation_rows = []
+                    generalization_rows = []
             
             
-                    for model_name, values in generalisation.items():
+                    for model_name, values in generalization.items():
             
                         status, explanation = (
-                            interpret_generalisation(
+                            interpret_generalization(
                                 values["train_accuracy"],
                                 values["validation_accuracy"]
                             )
                         )
             
             
-                        generalisation_rows.append({
+                        generalization_rows.append({
             
                             "Model":
                                 model_name,
@@ -1388,13 +1388,13 @@ elif page == "Dataset Analysis":
                         })
             
             
-                    generalisation_df = pd.DataFrame(
-                        generalisation_rows
+                    generalization_df = pd.DataFrame(
+                        generalization_rows
                     )
             
             
                     st.dataframe(
-                        generalisation_df,
+                        generalization_df,
                         use_container_width=True,
                         hide_index=True
                     )
