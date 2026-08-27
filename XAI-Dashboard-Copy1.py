@@ -692,7 +692,7 @@ def pct(value):
     return f"{float(value) * 100:.2f}%"
 
 
-def interpret_generalization(
+def interpret_generalisation(
     train_accuracy,
     validation_accuracy
 ):
@@ -1345,28 +1345,28 @@ elif page == "Dataset Analysis":
                 )
             
             
-                generalization = eda.get(
-                    "generalization_results",
+                generalisation = eda.get(
+                    "generalisation_results",
                     {}
                 )
             
             
-                if generalization:
+                if generalisation:
             
-                    generalization_rows = []
+                    generalisation_rows = []
             
             
-                    for model_name, values in generalization.items():
+                    for model_name, values in generalisation.items():
             
                         status, explanation = (
-                            interpret_generalization(
+                            interpret_generalisation(
                                 values["train_accuracy"],
                                 values["validation_accuracy"]
                             )
                         )
             
             
-                        generalization_rows.append({
+                        generalisation_rows.append({
             
                             "Model":
                                 model_name,
@@ -1388,13 +1388,13 @@ elif page == "Dataset Analysis":
                         })
             
             
-                    generalization_df = pd.DataFrame(
-                        generalization_rows
+                    generalisation_df = pd.DataFrame(
+                        generalisation_rows
                     )
             
             
                     st.dataframe(
-                        generalization_df,
+                        generalisation_df,
                         use_container_width=True,
                         hide_index=True
                     )
@@ -2192,6 +2192,12 @@ elif page == "Explainability":
             }).sort_values(by="AbsCoefficient", ascending=False)
 
             st.subheader("Generated Explanation")
+
+            st.info(
+                f"""
+                Note that explanations are approximations, and they support only support human judgement rather than replace them. 
+                """
+                    )
             
             top_reasons = reason_df.head(5)
 
@@ -2208,33 +2214,17 @@ elif page == "Explainability":
                 )
 
                 explanation += (
-                    f"\n- {row['Feature']} "
+                    f"\n• {row['Feature']} "
                     f"({direction} likelihood, "
                     f"SHAP={row['Coefficient']:.3f})\n"
                 )
-            
 
+            st.write(explanation) 
 
-            st.write(explanation)
-
-            st.subheader("Recommended Analyst Actions")
-            
-            st.info(
-                        f"""
-                        Note that explanations are approximations, and they support only support human judgement rather than replace them. 
-                        """
-                    )
-
-            recommendations = []
-
-            for _, row in top_reasons.iterrows():
-                recommendations.append(
-                    f"Investigate **{row['Feature']}**."
-                )
-
-            for rec in recommendations:
-                st.write("•", rec)
-
+            st.write("""
+            The recommended analyst action is to investigate the influencing features listed. For normal predictions, the influencing features will still need to be investigated as this is a decision-support tool. Continued routine monitoring is recommended.
+            """)
+        
         else:
             try:
                 background = eval_sample.sample(
@@ -2262,11 +2252,9 @@ elif page == "Explainability":
                 reason_df = pd.DataFrame({
                     "Feature": x_row.columns,
                     "SHAP Value": local_values
-                    # "Impact": np.abs(local_values)
                 })
 
                 reason_df = reason_df.sort_values(
-                    # by="Impact",
                     by="SHAP Value",
                     ascending=False
                 )
@@ -2277,6 +2265,12 @@ elif page == "Explainability":
                 )
 
                 st.subheader("Generated Explanation")
+                    
+                st.info(
+                    f"""
+                    Note that explanations are approximations, and they support only support human judgement rather than replace them. 
+                    """
+                        )
 
                 top_features = reason_df.head(5)
 
@@ -2294,32 +2288,16 @@ elif page == "Explainability":
                     )
 
                     explanation += (
-                        f"\n- {row['Feature']} "
+                        f"\n• {row['Feature']} "
                         f"({direction} likelihood, "
                         f"SHAP={row['SHAP Value']:.3f})\n"
                     )
 
                 st.write(explanation)
 
-                st.subheader("Recommended Analyst Actions")
-
-                st.info(
-                        f"""
-                        Note that explanations are approximations, and they support only support human judgement rather than replace them. 
-                        """
-                    )
-                
-                recommendations = []
-
-                for feature in top_features["Feature"]:
-                    recommendations.append(
-                        f"Investigate **'{feature}'**."
-                    )
-
-                recommendations = recommendations[:5]
-
-                for rec in recommendations:
-                    st.write("•", rec)
+                st.write("""
+                The recommended analyst action is to investigate the influencing features listed. For normal predictions, the influencing features will still need to be investigated as this is a decision-support tool. Continued routine monitoring is recommended.
+                """)
 
             except Exception as e:
                 st.warning(f"Could not generate reasoning: {e}")

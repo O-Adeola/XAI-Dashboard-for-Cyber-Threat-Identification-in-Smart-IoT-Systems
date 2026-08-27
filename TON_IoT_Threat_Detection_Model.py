@@ -1274,18 +1274,6 @@ shap.summary_plot(
 )
 
 
-# In[62]:
-
-
-print(type(rf_shap_values))
-print(np.array(rf_shap_values).shape)
-
-row_idx = 0
-class_idx = 0
-
-print(rf_shap_values[class_idx][row_idx].shape)
-
-
 # In[63]:
 
 
@@ -1299,11 +1287,6 @@ rf_explainer = shap.TreeExplainer(rf)
 
 # shap values 
 rf_shap_values = rf_explainer.shap_values(sample)
-
-# pick instance + class
-row_idx = 0
-class_idx = 0
-
 
 single_row = sample.iloc[[row_idx]].values
 

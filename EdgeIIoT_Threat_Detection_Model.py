@@ -1366,10 +1366,6 @@ rf_explainer = shap.TreeExplainer(rf)
 # shap values 
 rf_shap_values = rf_explainer.shap_values(sample)
 
-# pick instance + class
-row_idx = 0
-class_idx = 0
-
 single_row = sample.iloc[[row_idx]].values
 
 # FORCE PLOT 
@@ -1400,7 +1396,7 @@ dt_explainer = shap.TreeExplainer(dt)
 dt_shap_values = dt_explainer.shap_values(sample)
 
 # =========================
-# FORCE PLOT (correct indexing)
+# FORCE PLOT 
 # =========================
 shap.initjs()
 
@@ -1456,7 +1452,7 @@ xgb_explainer = shap.TreeExplainer(xgb)
 xgb_shap_values = xgb_explainer.shap_values(sample)
 
 # =========================
-# FORCE PLOT (correct indexing)
+# FORCE PLOT 
 # =========================
 shap.initjs()
 
